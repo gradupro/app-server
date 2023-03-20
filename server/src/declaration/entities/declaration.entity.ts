@@ -10,7 +10,7 @@ import {
 import { Location } from '../../location/entities/location.entity';
 import { User } from '../../user/entities/user.entity';
 import { CategoryEnum } from './Enums';
-@Entity()
+@Entity('DECLARATION')
 export class Declaration {
   @PrimaryGeneratedColumn()
   id: number;

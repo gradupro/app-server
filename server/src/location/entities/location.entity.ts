@@ -9,7 +9,7 @@ import {
 import { Declaration } from '../../declaration/entities/declaration.entity';
 import { Point, LineString } from 'wkx';
 
-@Entity()
+@Entity('LOCATION')
 export class Location {
   @PrimaryGeneratedColumn()
   id: number;

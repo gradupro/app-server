@@ -1,34 +1,60 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { UserService } from './user.service';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  HttpStatus,
+  Post,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import { Response } from 'express';
+import { AuthGuard } from '../auth.guard';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
+import { UserService } from './user.service';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  @Post('signup')
+  async signup(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
+    try {
+      const signupResult = await this.userService.create(createUserDto);
+      return res
+        .status(HttpStatus.CREATED)
+        .json({ status: HttpStatus.CREATED, data: signupResult });
+    } catch (e) {
+      return res.status(e.status).json(e.response);
+    }
   }
 
-  @Get()
-  findAll() {
-    return this.userService.findAll();
+  @Post('login')
+  async login(@Body() loginUserDto: LoginUserDto, @Res() res: Response) {
+    try {
+      const loginResult = await this.userService.login(loginUserDto);
+      return res
+        .status(HttpStatus.OK)
+        .json({ status: HttpStatus.OK, data: loginResult });
+    } catch (e) {
+      return res.status(e.status).json(e.response);
+    }
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  @UseGuards(AuthGuard)
+  @Get('info')
+  async getUserInfo(@Headers() headers: any, @Res() res: Response) {
+    try {
+      console.log(headers.user);
+      const userInfoResult = await this.userService.getUserInfo(
+        headers.user.id,
+      );
+      return res
+        .status(HttpStatus.OK)
+        .json({ status: HttpStatus.OK, data: userInfoResult });
+    } catch (e) {
+      return res.status(e.status).json(e.response);
+    }
   }
 }
