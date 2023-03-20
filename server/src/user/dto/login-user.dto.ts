@@ -1,9 +1,6 @@
 import { IsMobilePhone, IsNotEmpty, IsString } from 'class-validator';
-export class CreateUserDto {
-  @IsNotEmpty()
-  @IsString()
-  readonly name: string;
 
+export class LoginUserDto {
   @IsNotEmpty()
   @IsString()
   @IsMobilePhone('ko-KR')

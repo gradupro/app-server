@@ -6,9 +6,11 @@ import { DatabaseModule } from './database/database.module';
 import { DeclarationModule } from './declaration/declaration.module';
 import { LocationModule } from './location/location.module';
 import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     UserModule,
     DatabaseModule,
     DeclarationModule,

@@ -9,7 +9,7 @@ export const databaseProviders = [
         type: 'mysql',
         host: 'localhost',
         port: 3306,
-        timezone: 'Asia/Seoul',
+        timezone: '+09:00',
         charset: 'utf8mb4_general_ci',
         logging: true,
         username: 'root',

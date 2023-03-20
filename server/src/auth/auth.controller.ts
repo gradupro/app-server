@@ -1,34 +1,35 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Res, HttpStatus } from '@nestjs/common';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { SendSMSDTO } from './dto/sendSMS.dto';
+import { VerifyCodeDTO } from './dto/verifyCode.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  @Post('SMS')
+  async sendSMS(@Res() res: Response, @Body() sendSMSDTO: SendSMSDTO) {
+    try {
+      const sendCodeByPhoneNumberResult =
+        await this.authService.sendCodeByPhoneNumber(sendSMSDTO);
+      return res
+        .status(HttpStatus.OK)
+        .json({ status: HttpStatus.OK, data: sendCodeByPhoneNumberResult });
+    } catch (e) {
+      return res.status(e.status).json(e.response);
+    }
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+  @Post('code')
+  async verifyCode(@Res() res: Response, @Body() verifyCodeDTO: VerifyCodeDTO) {
+    try {
+      const verifyCodeResult = await this.authService.verifyCode(verifyCodeDTO);
+      return res
+        .status(HttpStatus.ACCEPTED)
+        .json({ status: HttpStatus.ACCEPTED, data: verifyCodeResult });
+    } catch (e) {
+      return res.status(e.status).json(e.response);
+    }
   }
 }

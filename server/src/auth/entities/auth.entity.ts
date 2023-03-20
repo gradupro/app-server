@@ -5,7 +5,7 @@ import {
   CreateDateColumn,
 } from 'typeorm';
 
-@Entity()
+@Entity('VERIFY')
 export class Verify {
   @PrimaryGeneratedColumn()
   id: number;
@@ -18,4 +18,9 @@ export class Verify {
 
   @CreateDateColumn()
   created_at: Date;
+}
+
+export interface responseData {
+  status: number;
+  data: any;
 }
