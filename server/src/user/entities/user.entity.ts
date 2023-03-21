@@ -5,10 +5,8 @@ import {
   CreateDateColumn,
   Unique,
   OneToMany,
-  ManyToMany,
-  JoinTable,
-  JoinColumn,
   ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { Declaration } from '../../declaration/entities/declaration.entity';
 
@@ -30,47 +28,31 @@ export class User {
   @OneToMany(() => Declaration, (declaration) => declaration.user)
   declarations: Declaration[];
 
-  /*
-  @ManyToMany(() => User, (user) => user.wards)
-  @JoinTable({
-    name: 'ProtectorWard',
-    joinColumn: {
-      name: 'wardId',
-      referencedColumnName: 'id',
-    },
-    inverseJoinColumn: {
-      name: 'protectorId',
-      referencedColumnName: 'id',
-    },
-  })
-  protectors: User[];
+  @OneToMany(() => UserProtector, (userProtector) => userProtector.protector)
+  wards: UserProtector[];
 
-  @ManyToMany(() => User, (user) => user.protectors)
-  wards: User[];
-  */
-  @OneToMany(() => ProtectorWard, (protectorWard) => protectorWard.wards)
-  wards: ProtectorWard[];
-  @OneToMany(() => ProtectorWard, (protectorWard) => protectorWard.protectors)
-  protectors: ProtectorWard[];
+  @OneToMany(() => UserProtector, (userProtector) => userProtector.ward)
+  protectors: UserProtector[];
 }
-@Entity('ProtectorWard')
-export class ProtectorWard {
+@Entity()
+export class UserProtector {
   @PrimaryGeneratedColumn()
-  ProtectorWardId: number;
+  id: number;
+
+  @Column({ default: false })
+  accept: boolean;
+
+  @CreateDateColumn()
+  request_date: Date;
+
+  @ManyToOne(() => User, (user) => user.protectors)
+  @JoinColumn({ name: 'wardId' })
+  ward: User;
 
   @ManyToOne(() => User, (user) => user.wards)
   @JoinColumn({ name: 'protectorId' })
-  protectors: User;
-
-  protectorId: number;
-  @ManyToOne(() => User, (user) => user.protectors)
-  @JoinColumn({ name: 'wardId' })
-  wards: User;
-
-  @Column()
-  accept: boolean;
+  protector: User;
 }
-
 export interface userToken {
   created: boolean;
   accessToken: string;

@@ -12,6 +12,10 @@ import { Response } from 'express';
 import { AuthGuard } from '../auth.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
+import {
+  RequestProtectorDTO,
+  AllowRequestProtectorDTO,
+} from './dto/requestProtector.dto';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -53,6 +57,76 @@ export class UserController {
       return res
         .status(HttpStatus.OK)
         .json({ status: HttpStatus.OK, data: userInfoResult });
+    } catch (e) {
+      return res.status(e.status).json(e.response);
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('protector')
+  async requestProtector(
+    @Headers() headers: any,
+    @Body() requestProtectorDTO: RequestProtectorDTO,
+    @Res() res: Response,
+  ) {
+    try {
+      const requestProtectorResult = await this.userService.requestProtector(
+        headers.user.id,
+        requestProtectorDTO.protectorId,
+      );
+      return res
+        .status(HttpStatus.OK)
+        .json({ status: HttpStatus.OK, data: requestProtectorResult });
+    } catch (e) {
+      return res.status(e.status).json(e.response);
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('protector/request')
+  async getRequestProtect(@Headers() headers: any, @Res() res: Response) {
+    try {
+      const requestProtectionListResult =
+        await this.userService.getRequestedProtection(headers.user.id);
+      return res
+        .status(HttpStatus.OK)
+        .json({ status: HttpStatus.OK, data: requestProtectionListResult });
+    } catch (e) {
+      return res.status(e.status).json(e.response);
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('protector/allow')
+  async allowRequestProtect(
+    @Headers() headers: any,
+    @Body() allowRequestProtectorDTO: AllowRequestProtectorDTO,
+    @Res() res: Response,
+  ) {
+    try {
+      const allowProtectResult =
+        await this.userService.allowRequestedProtection(
+          headers.user.id,
+          allowRequestProtectorDTO.wardId,
+        );
+      return res
+        .status(HttpStatus.ACCEPTED)
+        .json({ status: HttpStatus.ACCEPTED, data: allowProtectResult });
+    } catch (e) {
+      return res.status(e.status).json(e.response);
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('protector')
+  async getProtectors(@Headers() headers: any, @Res() res: Response) {
+    try {
+      const protectorListResult = await this.userService.getProtectorList(
+        headers.user.id,
+      );
+      return res
+        .status(HttpStatus.OK)
+        .json({ status: HttpStatus.OK, data: protectorListResult });
     } catch (e) {
       return res.status(e.status).json(e.response);
     }
