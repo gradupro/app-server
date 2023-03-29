@@ -3,20 +3,13 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { DatabaseModule } from './database/database.module';
-import { DeclarationModule } from './declaration/declaration.module';
+import { ReportModule } from './report/report.module';
 import { LocationModule } from './location/location.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot(),
-    UserModule,
-    DatabaseModule,
-    DeclarationModule,
-    LocationModule,
-    AuthModule,
-  ],
+  imports: [ConfigModule.forRoot(), UserModule, DatabaseModule, ReportModule, LocationModule, AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })

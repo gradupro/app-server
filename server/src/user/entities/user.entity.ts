@@ -1,14 +1,5 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  Unique,
-  OneToMany,
-  ManyToOne,
-  JoinColumn,
-} from 'typeorm';
-import { Declaration } from '../../declaration/entities/declaration.entity';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, Unique, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
+import { Report } from '../../report/entities/report.entity';
 
 @Entity('USER')
 @Unique('my_unique_constraint', ['phone_number'])
@@ -25,8 +16,8 @@ export class User {
   @CreateDateColumn()
   created_at: Date;
 
-  @OneToMany(() => Declaration, (declaration) => declaration.user)
-  declarations: Declaration[];
+  @OneToMany(() => Report, (report) => report.user)
+  reports: Report[];
 
   @OneToMany(() => UserProtector, (userProtector) => userProtector.protector)
   wards: UserProtector[];

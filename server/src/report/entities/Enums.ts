@@ -4,4 +4,5 @@ export enum CategoryEnum {
   theft = 'theft',
   violent = 'violent',
   emergency = 'emergency',
+  regular = 'regular',
 }
