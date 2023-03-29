@@ -1,12 +1,5 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  OneToOne,
-  UpdateDateColumn,
-} from 'typeorm';
-import { Declaration } from '../../declaration/entities/declaration.entity';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToOne, UpdateDateColumn } from 'typeorm';
+import { Report } from '../../report/entities/report.entity';
 import { Point, LineString } from 'wkx';
 
 @Entity('LOCATION')
@@ -34,6 +27,6 @@ export class Location {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @OneToOne(() => Declaration, (declaration) => declaration.location)
-  declaration: Declaration;
+  @OneToOne(() => Report, (report) => report.location)
+  report: Report;
 }
