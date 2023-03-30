@@ -21,15 +21,9 @@ export class UserService {
         created: true,
         accessToken: '',
       };
-      const createdUser = await this.userRepository
-        .createQueryBuilder()
-        .insert()
-        .values([createUserDto])
-        .execute();
+      const createdUser = await this.userRepository.createQueryBuilder().insert().values([createUserDto]).execute();
       console.log(createdUser);
-      result.accessToken = await this.authService.createJWT(
-        createdUser.raw.insertId,
-      );
+      result.accessToken = await this.authService.createJWT(createdUser.raw.insertId);
       return result;
     } catch (e) {
       console.log(e);
@@ -80,7 +74,7 @@ export class UserService {
     }
   }
 
-  async getUserInfo(userId: number): Promise<any> {
+  async getUserInfo(userId: number): Promise<User> {
     try {
       const userInfo = await this.userRepository
         .createQueryBuilder('user')
@@ -176,13 +170,7 @@ export class UserService {
   async allowRequestedProtection(userId: number, wardId: number): Promise<any> {
     try {
       console.log(userId, wardId);
-      await this.protectorRepository
-        .createQueryBuilder()
-        .update(UserProtector)
-        .set({ accept: true })
-        .where('user_protector.protectorId = :userId', { userId })
-        .andWhere('user_protector.wardId = :wardId', { wardId })
-        .execute();
+      await this.protectorRepository.createQueryBuilder().update(UserProtector).set({ accept: true }).where('user_protector.protectorId = :userId', { userId }).andWhere('user_protector.wardId = :wardId', { wardId }).execute();
 
       const requestedProtection = await this.protectorRepository
         .createQueryBuilder('userProtector')
@@ -234,6 +222,50 @@ export class UserService {
         },
       });
       return protectorList;
+    } catch (e) {
+      console.log(e);
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: [e.message.split('\n')[0]],
+          error: 'INTERNAL_SERVER_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async isProtector(wardId: number, checkUserId: number): Promise<any> {
+    try {
+      const protectorList = await this.protectorRepository.find({
+        relations: {
+          protector: true,
+        },
+        select: {
+          request_date: true,
+          accept: true,
+          protector: {
+            id: true,
+            name: true,
+            phone_number: true,
+          },
+        },
+        where: {
+          ward: {
+            id: wardId,
+          },
+          accept: true,
+        },
+      });
+      let isRequestUserProtector: boolean;
+      protectorList.forEach((pl) => {
+        if (pl.protector.id === checkUserId) {
+          isRequestUserProtector = true;
+        } else {
+          isRequestUserProtector = false;
+        }
+      });
+      return isRequestUserProtector;
     } catch (e) {
       console.log(e);
       throw new HttpException(

@@ -13,6 +13,7 @@ import { HttpService } from '@nestjs/axios';
 
 import { TranscribeClient, StartTranscriptionJobCommand, TranscriptionJob, GetTranscriptionJobCommand, GetTranscriptionJobCommandOutput } from '@aws-sdk/client-transcribe';
 import { User } from '../user/entities/user.entity';
+import { CategoryEnum } from './entities/Enums';
 
 @Injectable()
 export class ReportService {
@@ -208,7 +209,7 @@ export class ReportService {
     }
   }
 
-  async createVoice(voice_url: string, text: string, report: Report): Promise<any> {
+  async createVoice(voice_url: string, text: string, report: Report): Promise<Voice> {
     try {
       const newVoice = new Voice();
       newVoice.note = text;
@@ -229,7 +230,7 @@ export class ReportService {
     }
   }
 
-  async prediction(voiceObjectKey: string, text: string, voice: Voice): Promise<any> {
+  async prediction(voiceObjectKey: string, text: string, voice: Voice): Promise<Prediction> {
     try {
       const form: FormData = new FormData();
       form.append('s3_key', voiceObjectKey);
@@ -269,6 +270,127 @@ export class ReportService {
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
+    } catch (e) {
+      console.log(e);
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: [e.message.split('\n')[0]],
+          error: 'INTERNAL_SERVER_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getOne(reportId: number, api: boolean): Promise<Report> {
+    try {
+      let relations: any;
+      if (api) {
+        relations = {
+          user: true,
+          voices: {
+            prediction: true,
+          },
+        };
+      } else {
+        relations = {};
+      }
+      const report = await this.reportRepository.findOne({
+        where: {
+          id: reportId,
+        },
+        relations: relations,
+      });
+
+      return report;
+    } catch (e) {
+      console.log(e);
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: [e.message.split('\n')[0]],
+          error: 'INTERNAL_SERVER_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getMany(userId: number): Promise<Report[]> {
+    try {
+      const reports = await this.reportRepository.find({
+        where: {
+          user: {
+            id: userId,
+          },
+        },
+        relations: {
+          user: true,
+          voices: {
+            prediction: true,
+          },
+        },
+      });
+
+      return reports;
+    } catch (e) {
+      console.log(e);
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: [e.message.split('\n')[0]],
+          error: 'INTERNAL_SERVER_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updateReportCategory(reportId: number): Promise<Report> {
+    try {
+      const report = await this.reportRepository.findOne({
+        where: {
+          id: reportId,
+        },
+        relations: {
+          voices: {
+            prediction: true,
+          },
+        },
+      });
+      let updatedCategory: string;
+      report.voices.forEach((v) => {
+        if (v.prediction.combined_label !== 'regular') {
+          updatedCategory = v.prediction.combined_label;
+        }
+      });
+      report.category = CategoryEnum[updatedCategory];
+      await this.reportRepository.save(report);
+      return report;
+    } catch (e) {
+      console.log(e);
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: [e.message.split('\n')[0]],
+          error: 'INTERNAL_SERVER_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updateReportInterrupt(reportId: number, role: string): Promise<Report> {
+    try {
+      const report = await this.reportRepository.findOne({
+        where: {
+          id: reportId,
+        },
+      });
+      report[`${role}_interruption`] = true;
+      await this.reportRepository.save(report);
+      return report;
     } catch (e) {
       console.log(e);
       throw new HttpException(
