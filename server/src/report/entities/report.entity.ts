@@ -10,7 +10,10 @@ export class Report {
   id: number;
 
   @Column({ default: false })
-  interruption: boolean;
+  protector_interruption: boolean;
+
+  @Column({ default: false })
+  reporter_interruption: boolean;
 
   @Column({ type: 'enum', name: 'category', enum: CategoryEnum, default: CategoryEnum.regular })
   category: CategoryEnum;
