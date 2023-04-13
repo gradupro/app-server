@@ -7,16 +7,17 @@ export const databaseProviders = [
     useFactory: async () => {
       const options: DataSourceOptions = {
         type: 'mysql',
-        host: 'localhost',
+        host: process.env.DATABASE_HOST,
         port: 3306,
         timezone: '+09:00',
         charset: 'utf8mb4_general_ci',
         logging: true,
-        username: 'root',
-        password: '1234',
-        database: 'emerdy',
+        username: process.env.DATABASE_USER,
+        password: process.env.DATABASE_PASSWORD,
+        database: `emerdy_${process.env.NODE_ENV}`,
         entities: [__dirname + '/../**/*.entity{.ts,.js}'],
         synchronize: true,
+        legacySpatialSupport: false,
       };
 
       await createDatabase({

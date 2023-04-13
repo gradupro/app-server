@@ -253,9 +253,10 @@ export class ReportService {
         const newPrediction = new Prediction();
         newPrediction.voice = voice;
         newPrediction.audio_label = mlServerResult.audio_label;
-        newPrediction.audio_probabilities = mlServerResult.audio_probabilities;
+        newPrediction.audio_feature = mlServerResult.audio_feature;
         newPrediction.text_label = mlServerResult.text_label;
-        newPrediction.text_probabilities = mlServerResult.text_probabilities;
+        newPrediction.text_feature = mlServerResult.text_feature;
+        newPrediction.combined_probabilities = mlServerResult.combined_probabilities;
         newPrediction.combined_label = mlServerResult.combined_label;
 
         await this.predictionRepository.save(newPrediction);

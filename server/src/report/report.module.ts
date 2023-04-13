@@ -12,5 +12,6 @@ import { UserModule } from '../user/user.module';
   imports: [DatabaseModule, ConfigModule, HttpModule, UserModule, AuthModule],
   controllers: [ReportController],
   providers: [...reportProviders, ReportService],
+  exports: [...reportProviders, ReportService],
 })
 export class ReportModule {}

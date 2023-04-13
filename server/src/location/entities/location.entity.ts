@@ -1,24 +1,21 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToOne, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToOne, UpdateDateColumn, Point, LineString } from 'typeorm';
 import { Report } from '../../report/entities/report.entity';
-import { Point, LineString } from 'wkx';
 
 @Entity('LOCATION')
 export class Location {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 100 })
+  @Column({ length: 100, nullable: true })
   address: string;
 
-  @Column({ type: 'point' })
+  @Column({ type: 'geometry', spatialFeatureType: 'Point', srid: 4326 })
   start_point: Point;
 
-  @Column({ type: 'point' })
+  @Column({ type: 'geometry', spatialFeatureType: 'Point', srid: 4326 })
   current_point: Point;
 
-  @Column({
-    type: 'linestring',
-  })
+  @Column({ type: 'geometry', spatialFeatureType: 'LineString', srid: 4326, nullable: true })
   route: LineString;
 
   @CreateDateColumn({})

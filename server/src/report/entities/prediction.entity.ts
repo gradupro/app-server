@@ -9,17 +9,20 @@ export class Prediction {
   @Column({ length: 300 })
   combined_label: string;
 
+  @Column('simple-array')
+  combined_probabilities: number[];
+
   @Column({ length: 300 })
   audio_label: string;
 
   @Column('simple-array')
-  audio_probabilities: number[];
+  audio_feature: number[];
 
   @Column({ length: 300 })
   text_label: string;
 
   @Column('simple-array')
-  text_probabilities: number[];
+  text_feature: number[];
 
   @OneToOne(() => Voice, (voice) => voice.prediction)
   @JoinColumn()
