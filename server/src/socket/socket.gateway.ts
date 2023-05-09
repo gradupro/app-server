@@ -1,10 +1,16 @@
-import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, ConnectedSocket } from '@nestjs/websockets';
-import { Logger, UseGuards } from '@nestjs/common';
+import {
+  MessageBody,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+} from '@nestjs/websockets';
+import { Logger } from '@nestjs/common';
 import { ServerToClientEvents, ClientToServerEvents, Message, JoinRoom } from './socket.interface';
 import { Server, Socket } from 'socket.io';
 
 import { SocketService } from './socket.service';
-import { WsGuard } from '../ws.guard';
 
 @WebSocketGateway(3030, {
   transports: ['websocket'],

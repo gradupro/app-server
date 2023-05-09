@@ -21,7 +21,11 @@ export class UserService {
         created: true,
         accessToken: '',
       };
-      const createdUser = await this.userRepository.createQueryBuilder().insert().values([createUserDto]).execute();
+      const createdUser = await this.userRepository
+        .createQueryBuilder()
+        .insert()
+        .values([createUserDto])
+        .execute();
       console.log(createdUser);
       result.accessToken = await this.authService.createJWT(createdUser.raw.insertId);
       return result;
@@ -170,7 +174,13 @@ export class UserService {
   async allowRequestedProtection(userId: number, wardId: number): Promise<any> {
     try {
       console.log(userId, wardId);
-      await this.protectorRepository.createQueryBuilder().update(UserProtector).set({ accept: true }).where('user_protector.protectorId = :userId', { userId }).andWhere('user_protector.wardId = :wardId', { wardId }).execute();
+      await this.protectorRepository
+        .createQueryBuilder()
+        .update(UserProtector)
+        .set({ accept: true })
+        .where('user_protector.protectorId = :userId', { userId })
+        .andWhere('user_protector.wardId = :wardId', { wardId })
+        .execute();
 
       const requestedProtection = await this.protectorRepository
         .createQueryBuilder('userProtector')

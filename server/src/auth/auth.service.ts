@@ -8,6 +8,7 @@ import { EntityNotFoundError, Repository } from 'typeorm';
 import { Verify } from './entities/auth.entity';
 import { VerifyCodeDTO } from './dto/verifyCode.dto';
 import { User } from '../user/entities/user.entity';
+import { NaverCloudService } from '../naver-cloud/naver-cloud.service';
 
 @Injectable()
 export class AuthService {
@@ -15,84 +16,19 @@ export class AuthService {
     @Inject('VERIFY_REPOSITORY')
     private verifyRepository: Repository<Verify>,
     private config: ConfigService,
+    private naverCloudService: NaverCloudService,
   ) {}
-
-  private makeSignature(): string {
-    const message = [];
-    const hmac = crypto.createHmac('sha256', this.config.get('NCP_secretKey'));
-    const space = ' ';
-    const newLine = '\n';
-    const method = 'POST';
-    const timestamp = Date.now().toString();
-    const uri = this.config.get('NCP_serviceId');
-    message.push(method);
-    message.push(space);
-    message.push(`/sms/v2/services/${uri}/messages`);
-    message.push(newLine);
-    message.push(timestamp);
-    message.push(newLine);
-    message.push(this.config.get('NCP_accessKey'));
-    //message 배열에 위의 내용들을 담아준 후에
-    const signature = hmac.update(message.join('')).digest('base64');
-    //message.join('') 으로 만들어진 string 을 hmac 에 담고, base64로 인코딩한다
-    return signature.toString(); // toString()이 없었어서 에러가 자꾸 났었는데, 반드시 고쳐야함.
-  }
-
-  private async sendSMS(
-    phone_number: string,
-    verify_code: string,
-  ): Promise<any> {
-    const body = {
-      type: 'SMS',
-      contentType: 'COMM',
-      countryCode: '82',
-      from: this.config.get('hostPhoneNumber'), // 발신자 번호
-      content: `인증 번호는 ${verify_code}입니다.`,
-      messages: [
-        {
-          to: phone_number, // 수신자 번호
-        },
-      ],
-    };
-    const options = {
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-        'x-ncp-iam-access-key': this.config.get('NCP_accessKey'),
-        'x-ncp-apigw-timestamp': Date.now().toString(),
-        'x-ncp-apigw-signature-v2': this.makeSignature(),
-      },
-    };
-    axios
-      .post(this.config.get('NCP_URL'), body, options)
-      .then(async (res) => {
-        // 성공 이벤트
-        return { status: res.status, response: res.data };
-      })
-      .catch((err) => {
-        console.error(err);
-        throw new HttpException(
-          {
-            status: HttpStatus.INTERNAL_SERVER_ERROR,
-            message: ['INTERNAL_SERVER_ERROR'],
-            error: 'INTERNAL_SERVER_ERROR',
-          },
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      });
-  }
 
   async sendCodeByPhoneNumber(sendSMSDTO: SendSMSDTO): Promise<any> {
     try {
-      const verify_code = Math.floor(
-        100000 + Math.random() * 900000,
-      ).toString();
+      const verify_code = Math.floor(100000 + Math.random() * 900000).toString();
       const createdVerify = await this.verifyRepository
         .createQueryBuilder()
         .insert()
         .into(Verify)
         .values([{ code: verify_code, phone_number: sendSMSDTO.phone_number }])
         .execute();
-      const sendSMSResult = await this.sendSMS(
+      const sendSMSResult = await this.naverCloudService.sendSMS(
         sendSMSDTO.phone_number,
         verify_code,
       );
@@ -101,7 +37,7 @@ export class AuthService {
       throw new HttpException(
         {
           status: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: [e.message.split('\n')[0]],
+          message: [...e.response.message],
           error: 'INTERNAL_SERVER_ERROR',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -136,11 +72,11 @@ export class AuthService {
       }
       throw new HttpException(
         {
-          status: status,
-          message: [e.message.split('\n')[0]],
-          error: error,
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: [...e.response.message],
+          error: 'INTERNAL_SERVER_ERROR',
         },
-        status,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }

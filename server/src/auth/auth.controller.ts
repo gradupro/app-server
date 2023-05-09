@@ -11,8 +11,8 @@ export class AuthController {
   @Post('SMS')
   async sendSMS(@Res() res: Response, @Body() sendSMSDTO: SendSMSDTO) {
     try {
-      const sendCodeByPhoneNumberResult =
-        await this.authService.sendCodeByPhoneNumber(sendSMSDTO);
+      console.log(sendSMSDTO);
+      const sendCodeByPhoneNumberResult = await this.authService.sendCodeByPhoneNumber(sendSMSDTO);
       return res
         .status(HttpStatus.OK)
         .json({ status: HttpStatus.OK, data: sendCodeByPhoneNumberResult });

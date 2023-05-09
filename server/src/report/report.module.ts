@@ -7,9 +7,17 @@ import { DatabaseModule } from '../database/database.module';
 import { reportProviders } from './report.providers';
 import { AuthModule } from '../auth/auth.module';
 import { UserModule } from '../user/user.module';
+import { PushNotificationModule } from '../pushNotification/pushNotification.module';
 
 @Module({
-  imports: [DatabaseModule, ConfigModule, HttpModule, UserModule, AuthModule],
+  imports: [
+    DatabaseModule,
+    ConfigModule,
+    HttpModule,
+    UserModule,
+    AuthModule,
+    PushNotificationModule,
+  ],
   controllers: [ReportController],
   providers: [...reportProviders, ReportService],
   exports: [...reportProviders, ReportService],
