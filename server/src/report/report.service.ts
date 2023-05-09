@@ -11,7 +11,13 @@ import { AxiosError, AxiosRequestConfig } from 'axios';
 import { catchError, lastValueFrom, map } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 
-import { TranscribeClient, StartTranscriptionJobCommand, TranscriptionJob, GetTranscriptionJobCommand, GetTranscriptionJobCommandOutput } from '@aws-sdk/client-transcribe';
+import {
+  TranscribeClient,
+  StartTranscriptionJobCommand,
+  TranscriptionJob,
+  GetTranscriptionJobCommand,
+  GetTranscriptionJobCommandOutput,
+} from '@aws-sdk/client-transcribe';
 import { User } from '../user/entities/user.entity';
 import { CategoryEnum } from './entities/Enums';
 
@@ -87,7 +93,11 @@ export class ReportService {
     }
   }
 
-  private async sendTranscribeJob(transcribeClient: TranscribeClient, s3Object: any, report: Report): Promise<TranscriptionJob> {
+  private async sendTranscribeJob(
+    transcribeClient: TranscribeClient,
+    s3Object: any,
+    report: Report,
+  ): Promise<TranscriptionJob> {
     try {
       const jobName = `${Date.now()}-${report.id}`;
       const params = {
@@ -95,9 +105,11 @@ export class ReportService {
         LanguageCode: 'ko-KR',
         MediaFormat: 'wav',
         Media: {
-          MediaFileUri: `https://s3-ap-northeast-2.amazonaws.com/${this.config.get('AWS_BUCKET_NAME')}/${s3Object.s3_key}`,
+          MediaFileUri: `https://s3-ap-northeast-2.amazonaws.com/${this.config.get(
+            'AWS_BUCKET_NAME',
+          )}/${s3Object.s3_key}`,
         },
-        OutputBucketName: 'emerdy-audio-transcribe-output',
+        OutputBucketName: 'emerdy-app-audio-transcribe-output',
       };
       const transcribeCommand = new StartTranscriptionJobCommand(params);
 
@@ -122,7 +134,10 @@ export class ReportService {
     });
   };
 
-  private async getTranscribeResult(transcribeClient: TranscribeClient, transcriptionJobName: string): Promise<TranscriptionJob> {
+  private async getTranscribeResult(
+    transcribeClient: TranscribeClient,
+    transcriptionJobName: string,
+  ): Promise<TranscriptionJob> {
     try {
       const param = {
         TranscriptionJobName: transcriptionJobName,
@@ -141,7 +156,9 @@ export class ReportService {
           console.log(`Waiting for ${transcriptionJobName}. Current status is ${job_status}`);
         }
         i++;
-        await this.sleep(1000);
+        await new Promise((resolve) => {
+          setTimeout(resolve, 1000);
+        });
       }
     } catch (e) {
       console.log(e);
@@ -156,16 +173,18 @@ export class ReportService {
     }
   }
 
-  private async getTranscriptFile(keyName: string): Promise<JSON> {
+  private async getTranscriptFile(keyName: string): Promise<string> {
     try {
       const params = {
-        Bucket: 'emerdy-audio-transcribe-output',
+        Bucket: 'emerdy-app-audio-transcribe-output',
         Key: `${keyName}.json`,
       };
 
       const transcriptFile = await this.s3.getObject(params).promise();
-      const text: string = JSON.parse(transcriptFile.Body.toString('utf-8')).results.transcripts[0].transcript;
-      return JSON.parse(transcriptFile.Body.toString('utf-8'));
+      const transcripts = JSON.parse(transcriptFile.Body.toString('utf-8')).results.transcripts[0]
+        .transcript;
+      const text: string = transcripts === '' ? 'empty' : transcripts;
+      return text;
     } catch (e) {
       console.log(e);
       throw new HttpException(
@@ -189,13 +208,20 @@ export class ReportService {
         },
       };
       const transcribeClient = new TranscribeClient(transcribeConfig);
-      const transcriptionJobResponse = await this.sendTranscribeJob(transcribeClient, s3Object, report);
+      const transcriptionJobResponse = await this.sendTranscribeJob(
+        transcribeClient,
+        s3Object,
+        report,
+      );
       console.log('transcriptionJobResponse', transcriptionJobResponse); //TranscriptionJobName
-      const successTranscribe = await this.getTranscribeResult(transcribeClient, transcriptionJobResponse.TranscriptionJobName);
+      const successTranscribe = await this.getTranscribeResult(
+        transcribeClient,
+        transcriptionJobResponse.TranscriptionJobName,
+      );
       console.log('successTranscribe', successTranscribe); //Transcript.TranscriptFileUri
       console.log(successTranscribe.TranscriptionJobName);
-      const transcriptJSON = await this.getTranscriptFile(successTranscribe.TranscriptionJobName);
-      return transcriptJSON['results']['transcripts'][0]['transcript']; // results.transcripts[0].transcript
+      const script = await this.getTranscriptFile(successTranscribe.TranscriptionJobName);
+      return script; // results.transcripts[0].transcript
     } catch (e) {
       console.log(e);
       throw new HttpException(
@@ -357,6 +383,9 @@ export class ReportService {
         relations: {
           voices: {
             prediction: true,
+          },
+          user: {
+            protectors: true,
           },
         },
       });
