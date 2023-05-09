@@ -20,6 +20,7 @@ import {
 } from '@aws-sdk/client-transcribe';
 import { User } from '../user/entities/user.entity';
 import { CategoryEnum } from './entities/Enums';
+import { ReportType } from './entities/Enums';
 
 @Injectable()
 export class ReportService {
@@ -344,7 +345,7 @@ export class ReportService {
     }
   }
 
-  async getMany(userId: number): Promise<Report[]> {
+  async getMany(userId: number, type: ReportType): Promise<Report[]> {
     try {
       const reports = await this.reportRepository.find({
         where: {
@@ -359,7 +360,6 @@ export class ReportService {
           },
         },
       });
-
       return reports;
     } catch (e) {
       console.log(e);
