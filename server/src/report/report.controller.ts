@@ -163,17 +163,17 @@ export class ReportController {
   @Get(':type')
   async getReports(
     @Headers() headers: any,
-    @Param('type', new EnumValidationPipe(ReportType), new DefaultValuePipe(ReportType.REQUEST))
-    type: ReportType,
+    @Param('type') type: ReportType,
+    //@Param('type', new EnumValidationPipe(ReportType), new DefaultValuePipe(ReportType.REQUEST))
+    //type: ReportType,
     @Res() res: Response,
   ) {
     try {
-      let reportList: Report | Report[];
+      console.log(type);
       const reports = await this.reportService.getMany(headers.user.id, type);
-      reportList = reports;
       return res.status(HttpStatus.OK).json({
         status: HttpStatus.OK,
-        data: reportList,
+        data: reports,
       });
     } catch (e) {
       return res.status(e.status).json(e.response);

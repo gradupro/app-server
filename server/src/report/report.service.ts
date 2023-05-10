@@ -347,19 +347,44 @@ export class ReportService {
 
   async getMany(userId: number, type: ReportType): Promise<Report[]> {
     try {
-      const reports = await this.reportRepository.find({
-        where: {
-          user: {
-            id: userId,
+      let reports: Report[];
+      if (type === ReportType.PROTECT) {
+        reports = await this.reportRepository.find({
+          where: {
+            user: {
+              protectors: {
+                protector: {
+                  id: userId,
+                },
+              },
+            },
           },
-        },
-        relations: {
-          user: true,
-          voices: {
-            prediction: true,
+          relations: {
+            user: {
+              protectors: true,
+            },
+            voices: {
+              prediction: true,
+            },
           },
-        },
-      });
+        });
+      } else if (type === ReportType.REQUEST) {
+        reports = await this.reportRepository.find({
+          where: {
+            user: {
+              id: userId,
+            },
+          },
+          relations: {
+            user: {
+              protectors: true,
+            },
+            voices: {
+              prediction: true,
+            },
+          },
+        });
+      }
       return reports;
     } catch (e) {
       console.log(e);
