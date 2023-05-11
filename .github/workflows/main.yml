@@ -34,9 +34,10 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v4
         with:
+          run: docker compose build | docker compose push
           builder: ${{ steps.buildx.outputs.name }}
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
+          #tags: ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
           secrets: |
             "DATABASE_HOST=${{ secrets.DATABASE_HOST }}"
             "DATABASE_USER=${{ secrets.DATABASE_USER }}"
