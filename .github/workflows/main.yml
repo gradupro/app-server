@@ -37,6 +37,14 @@ jobs:
           files: docker-compose.yml
           builder: ${{ steps.buildx.outputs.name }}
           push: true
+      - name: Copy a folder to s3
+        uses: prewk/s3-cp-action@v2
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_KEY }}
+          aws_region: ap-northeast-2
+          source: "docker-compose.yml"
+          dest: s3://${{secrets.AWS_BUCKET_NAME}}/
 
   deploy:
     needs: build
@@ -49,6 +57,18 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.CR_PAT }}
+      - name: Remove Docker Compose file
+        run: |
+          rm -f docker-compose.yml
+      - name: Copy a file to s3
+        uses: prewk/s3-cp-action@v2
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_KEY }}
+          aws_region: ap-northeast-2
+          source: s3://${{secrets.AWS_BUCKET_NAME}}/docker-compose.yml
+          dest: "./"
+          flags: --recursive
       - name: Docker run
         run: |
-          docker-compose pull reverse-proxy-container --include-deps | docker-compose down --volumes | docker-compose up -d
+          docker rmi $(docker images -q) | docker-compose down --volumes | docker-compose up -d
