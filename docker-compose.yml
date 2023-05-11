@@ -6,7 +6,7 @@ networks:
 
 services:
   reverse-proxy-container:
-    image: reverse-proxy:latest
+    image: ghcr.io/gradupro/reverse-proxy:latest
     build:
       context: ./nginx
     ports:
@@ -25,7 +25,7 @@ services:
       - server
 
   emerdy-app-container:
-    image: emerdy-app:latest
+    image: ghcr.io/gradupro/emerdy-app:latest
     build:
       context: ./server
     ports:
