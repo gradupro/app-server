@@ -17,8 +17,8 @@ export class NaverCloudService {
   constructor(private config: ConfigService) {
     this.serviceURL = {
       SMS: `/sms/v2/services/${this.config.get('NCP_SMS_SERVICEID')}/messages`,
-      PUSH_MESSAGE: `push/v2/services/${this.config.get('NCP_NOTIFICATION_SERVICEID')}/messages`,
-      DEVICE_TOKEN: `push/v2/services/${this.config.get('NCP_NOTIFICATION_SERVICEID')}/users`,
+      PUSH_MESSAGE: `/push/v2/services/${this.config.get('NCP_NOTIFICATION_SERVICEID')}/messages`,
+      DEVICE_TOKEN: `/push/v2/services/${this.config.get('NCP_NOTIFICATION_SERVICEID')}/users`,
     };
   }
 
@@ -42,16 +42,13 @@ export class NaverCloudService {
     return signature.toString(); // toString()이 없었어서 에러가 자꾸 났었는데, 반드시 고쳐야함.
   }
 
-  private makeHeader(serviceId: string, now: number): any {
+  private makeHeader(serviceURL: string, now: number): any {
     const options = {
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
         'x-ncp-iam-access-key': this.config.get('NCP_accessKey'),
         'x-ncp-apigw-timestamp': now,
-        'x-ncp-apigw-signature-v2': this.makeSignature(
-          `/sms/v2/services/${serviceId}/messages`,
-          now,
-        ),
+        'x-ncp-apigw-signature-v2': this.makeSignature(serviceURL, now),
       },
     };
     return options;
@@ -123,6 +120,12 @@ export class NaverCloudService {
 
   async pushNotification(data: NotificationDTO): Promise<any> {
     try {
+      let message: string;
+      if (data.reportType) {
+        message = `${data.reporterName}님이 ${data.reportType} 상황으로 도움을 요청하였습니다!`;
+      } else {
+        message = `${data.requesterName}님이 보호자 요청을 하였습니다.`;
+      }
       const now = Date.now();
       const body = {
         messageType: 'NOTIF',
@@ -132,7 +135,7 @@ export class NaverCloudService {
         },
         message: {
           default: {
-            content: `${data.reporterName}님이 ${data.reportType} 상황으로 도움을 요청하였습니다!`,
+            content: message,
           },
         },
       };
@@ -140,14 +143,7 @@ export class NaverCloudService {
       const res = await axios.post(this.config.get('NCP_NOTIFICATION_URL'), body, options);
       return { status: res.status, response: res.data };
     } catch (e) {
-      throw new HttpException(
-        {
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: e.response.data.errors,
-          error: 'INTERNAL_SERVER_ERROR',
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new Error(JSON.stringify(e.response.data.error));
     }
   }
 }

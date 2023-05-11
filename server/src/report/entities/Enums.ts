@@ -6,3 +6,8 @@ export enum CategoryEnum {
   emergency = 'emergency',
   regular = 'regular',
 }
+
+export enum ReportType {
+  REQUEST = 'request',
+  PROTECT = 'protect',
+}

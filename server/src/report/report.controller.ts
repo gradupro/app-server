@@ -11,6 +11,7 @@ import {
   Query,
   Get,
   Param,
+  DefaultValuePipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
@@ -20,6 +21,8 @@ import { Report } from './entities/report.entity';
 import { ReportService } from './report.service';
 import { PushNotificationService } from '../pushNotification/pushNotification.service';
 import { NotificationDTO } from '../pushNotification/dto/notification.dto';
+import { EnumValidationPipe } from '../enum.validate';
+import { ReportType } from './entities/Enums';
 
 @Controller('report')
 export class ReportController {
@@ -157,21 +160,34 @@ export class ReportController {
   }
 
   @UseGuards(AuthGuard)
-  @Get('')
-  async getReport(@Headers() headers: any, @Query() query: any, @Res() res: Response) {
+  @Get(':type')
+  async getReports(
+    @Headers() headers: any,
+    @Param('type') type: ReportType,
+    //@Param('type', new EnumValidationPipe(ReportType), new DefaultValuePipe(ReportType.REQUEST))
+    //type: ReportType,
+    @Res() res: Response,
+  ) {
     try {
-      const reportId = query.id;
-      let reportList: Report | Report[];
-      if (reportId) {
-        const report = await this.reportService.getOne(reportId, true);
-        reportList = report;
-      } else {
-        const reports = await this.reportService.getMany(headers.user.id);
-        reportList = reports;
-      }
+      console.log(type);
+      const reports = await this.reportService.getMany(headers.user.id, type);
       return res.status(HttpStatus.OK).json({
         status: HttpStatus.OK,
-        data: reportList,
+        data: reports,
+      });
+    } catch (e) {
+      return res.status(e.status).json(e.response);
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('')
+  async getReport(@Headers() headers: any, @Query('id') reportId: number, @Res() res: Response) {
+    try {
+      const report = await this.reportService.getOne(reportId, true);
+      return res.status(HttpStatus.OK).json({
+        status: HttpStatus.OK,
+        data: report,
       });
     } catch (e) {
       return res.status(e.status).json(e.response);
