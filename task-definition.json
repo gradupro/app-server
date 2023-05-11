@@ -30,6 +30,7 @@
       "volumesFrom": [],
       "logConfiguration": {
         "logDriver": "awslogs",
+        "secretOptions": null,
         "options": {
           "awslogs-group": "/ecs/emerdy-app-task",
           "awslogs-region": "ap-northeast-2",
@@ -62,6 +63,7 @@
       ],
       "logConfiguration": {
         "logDriver": "awslogs",
+        "secretOptions": null,
         "options": {
           "awslogs-group": "/ecs/emerdy-app-task",
           "awslogs-region": "ap-northeast-2",
@@ -70,6 +72,7 @@
       }
     }
   ],
+  "networkMode": "bridge",
   "taskRoleArn": "arn:aws:iam::429176748143:role/AmazonECSTaskS3BucketRole",
   "executionRoleArn": "arn:aws:iam::429176748143:role/ecsTaskExecutionRole",
   "requiresCompatibilities": ["EC2"],
