@@ -1,0 +1,78 @@
+{
+  "family": "emerdy-app-task",
+  "containerDefinitions": [
+    {
+      "name": "emerdy-app-container",
+      "image": "429176748143.dkr.ecr.ap-northeast-2.amazonaws.com/emerdy-app:latest",
+      "cpu": 1500,
+      "memory": 3000,
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "hostPort": 3000,
+          "protocol": "tcp"
+        },
+        {
+          "containerPort": 3030,
+          "hostPort": 3030,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "environment": [],
+      "environmentFiles": [
+        {
+          "value": "arn:aws:s3:::emerdy-app-bucket/production.env",
+          "type": "s3"
+        }
+      ],
+      "mountPoints": [],
+      "volumesFrom": [],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/emerdy-app-task",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    },
+    {
+      "name": "reverse-proxy-container",
+      "image": "429176748143.dkr.ecr.ap-northeast-2.amazonaws.com/reverse-proxy:latest",
+      "cpu": 500,
+      "memory": 1000,
+      "links": ["emerdy-app-container"],
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "hostPort": 80,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "environment": [],
+      "mountPoints": [],
+      "volumesFrom": [],
+      "dependsOn": [
+        {
+          "containerName": "emerdy-app-container",
+          "condition": "START"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/emerdy-app-task",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ],
+  "taskRoleArn": "arn:aws:iam::429176748143:role/AmazonECSTaskS3BucketRole",
+  "executionRoleArn": "arn:aws:iam::429176748143:role/ecsTaskExecutionRole",
+  "requiresCompatibilities": ["EC2"],
+  "cpu": "2048",
+  "memory": "4096"
+}

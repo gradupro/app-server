@@ -6,7 +6,7 @@ networks:
 
 services:
   reverse-proxy-container:
-    image: ghcr.io/gradupro/reverse-proxy:latest
+    image: 429176748143.dkr.ecr.ap-northeast-2.amazonaws.com/reverse-proxy:latest
     platform: linux/amd64
     build:
       context: ./nginx
@@ -26,7 +26,7 @@ services:
       - server
 
   emerdy-app-container:
-    image: ghcr.io/gradupro/emerdy-app:latest
+    image: 429176748143.dkr.ecr.ap-northeast-2.amazonaws.com/emerdy-app:latest
     platform: linux/amd64
     build:
       context: ./server
