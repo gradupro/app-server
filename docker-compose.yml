@@ -1,0 +1,37 @@
+version: "3"
+
+networks:
+  server:
+    driver: bridge
+
+services:
+  reverse-proxy-container:
+    image: reverse-proxy:latest
+    build:
+      context: ./nginx
+    ports:
+      - 80:80
+    restart: always
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/logrotate.conf:/etc/logrotate.conf
+    environment:
+      TZ: Asia/Seoul
+    links:
+      - emerdy-app-container
+    depends_on:
+      - emerdy-app-container
+    networks:
+      - server
+
+  emerdy-app-container:
+    image: emerdy-app:latest
+    build:
+      context: ./server
+    ports:
+      - "3000:3000"
+      - "3030:3030"
+    environment:
+      TZ: Asia/Seoul
+    networks:
+      - server

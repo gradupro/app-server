@@ -1,0 +1,77 @@
+name: CI/CD Docker
+
+on:
+  push:
+    branches: [main]
+env:
+  VERSION: ${{ github.sha }}
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v2
+      - name: Set up docker buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Cache docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ env.VERSION }} # runner 설정에서 읽어들일거에요.
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      - name: Login to ghcr
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.CR_PAT }}
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v4
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
+          secrets: |
+            "DATABASE_HOST=${{ secrets.DATABASE_HOST }}"
+            "DATABASE_USER=${{ secrets.DATABASE_USER }}"
+            "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}"
+            "NCP_secretKey=${{ secrets.NCP_secretKey }}"
+            "NCP_accessKey=${{ secrets.NCP_accessKey }}"
+            "hostPhoneNumber=${{ secrets.hostPhoneNumber }}"
+            "NCP_SMS_URL=${{ secrets.NCP_SMS_URL }}"
+            "NCP_NOTIFICATION_URL=${{ secrets.NCP_NOTIFICATION_URL }}"
+            "NCP_DEVICE_TOKEN_REGISTRATION_URL=${{ secrets.NCP_DEVICE_TOKEN_REGISTRATION_URL }}"
+            "secret=${{ secrets.SECRET }}"
+            "NCP_SMS_SERVICEID=${{ secrets.NCP_SMS_SERVICEID }}"
+            "NCP_NOTIFICATION_SERVICEID=${{ secrets.NCP_NOTIFICATION_SERVICEID }}"
+            "AWS_REGION=${{ secrets.AWS_REGION }}"
+            "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}"
+            "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}"
+            "AWS_BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }}"
+            "ML_SERVER_HOST=${{ secrets.ML_SERVER_HOST }}"
+            "NCP_AI_CLIENT_ID=${{ secrets.NCP_AI_CLIENT_ID }}"
+            "NCP_AI_SECRET_KEY=${{ secrets.NCP_AI_SECRET_KEY }}"
+            "REDIS_HOST=${{ secrets.REDIS_HOST }}"
+            "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}"
+            "REDIS_PORT=${{ secrets.REDIS_PORT }}"
+            "REDIS_USER=${{ secrets.REDIS_USER }}"
+
+  deploy:
+    needs: build
+    name: Deploy
+    runs-on: [self-hosted, application-server]
+    steps:
+      - name: Login to ghcr
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.CR_PAT }}
+      - name: Docker run
+        run: |
+          docker-compose down | docker rm $(docker ps -aq) | docker compose up -d
