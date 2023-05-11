@@ -67,8 +67,7 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_KEY }}
           aws_region: ap-northeast-2
           source: s3://${{secrets.AWS_BUCKET_NAME}}/docker-compose.yml
-          dest: "./"
-          flags: --recursive
+          dest: "/home/ec2-user/"
       - name: Docker run
         run: |
           docker rmi $(docker images -q) | docker-compose down --volumes | docker-compose up -d
