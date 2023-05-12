@@ -54,7 +54,7 @@
       ],
       "essential": true,
       "entryPoint": [],
-      "command": ["CMD", "nginx", "-g", "daemon off;"],
+      "command": ["nginx", "-g", "daemon off;"],
       "environment": [],
       "mountPoints": [],
       "volumesFrom": [],
