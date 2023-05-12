@@ -3,8 +3,8 @@
     {
       "name": "emerdy-app-container",
       "image": "429176748143.dkr.ecr.ap-northeast-2.amazonaws.com/emerdy-app:latest",
-      "cpu": 1000,
-      "memory": 500,
+      "cpu": 970,
+      "memory": 1500,
       "portMappings": [
         {
           "containerPort": 3000,
@@ -42,8 +42,8 @@
     {
       "name": "reverse-proxy-container",
       "image": "429176748143.dkr.ecr.ap-northeast-2.amazonaws.com/reverse-proxy:latest",
-      "cpu": 20,
-      "memory": 50,
+      "cpu": 50,
+      "memory": 200,
       "links": ["emerdy-app-container"],
       "portMappings": [
         {
