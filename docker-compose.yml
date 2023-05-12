@@ -14,7 +14,7 @@ services:
       - 80:80
     restart: always
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/logrotate.conf:/etc/logrotate.conf
     environment:
       TZ: Asia/Seoul
@@ -31,9 +31,10 @@ services:
     build:
       context: ./server
     ports:
-      - "3000:3000"
-      - "3030:3030"
+      - 3000:3000
+      - 3030:3030
     environment:
       TZ: Asia/Seoul
+    env_file: ./server/.env
     networks:
       - server
