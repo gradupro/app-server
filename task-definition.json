@@ -1,5 +1,4 @@
 {
-  "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:429176748143:task-definition/emerdy-app-task:19",
   "containerDefinitions": [
     {
       "name": "emerdy-app-container",
@@ -80,41 +79,10 @@
   "taskRoleArn": "arn:aws:iam::429176748143:role/AmazonECSTaskS3BucketRole",
   "executionRoleArn": "arn:aws:iam::429176748143:role/ecsTaskExecutionRole",
   "networkMode": "bridge",
-  "revision": 19,
   "volumes": [],
-  "status": "ACTIVE",
-  "requiresAttributes": [
-    {
-      "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
-    },
-    {
-      "name": "ecs.capability.execution-role-awslogs"
-    },
-    {
-      "name": "com.amazonaws.ecs.capability.ecr-auth"
-    },
-    {
-      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
-    },
-    {
-      "name": "ecs.capability.env-files.s3"
-    },
-    {
-      "name": "com.amazonaws.ecs.capability.task-iam-role"
-    },
-    {
-      "name": "ecs.capability.container-ordering"
-    },
-    {
-      "name": "ecs.capability.execution-role-ecr-pull"
-    }
-  ],
   "placementConstraints": [],
-  "compatibilities": ["EXTERNAL", "EC2"],
   "requiresCompatibilities": ["EC2"],
   "cpu": "1024",
   "memory": "1950",
-  "registeredAt": "2023-05-11T23:24:14.824Z",
-  "registeredBy": "arn:aws:iam::429176748143:user/23_HF094",
   "tags": []
 }
