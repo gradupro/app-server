@@ -33,6 +33,7 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
+          "awslogs-create-group": "true",
           "awslogs-group": "/ecs/emerdy-app-task",
           "awslogs-region": "ap-northeast-2",
           "awslogs-stream-prefix": "ecs"
@@ -67,6 +68,7 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
+          "awslogs-create-group": "true",
           "awslogs-group": "/ecs/emerdy-app-task",
           "awslogs-region": "ap-northeast-2",
           "awslogs-stream-prefix": "ecs"
