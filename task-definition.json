@@ -19,7 +19,7 @@
       ],
       "essential": true,
       "entryPoint": [],
-      "command": ["sh", "-c", "pm2-runtime start ecosystem.config.js --env production"],
+      "command": [],
       "environment": [],
       "environmentFiles": [
         {
@@ -54,7 +54,7 @@
       ],
       "essential": true,
       "entryPoint": [],
-      "command": ["nginx", "-g", "daemon off;"],
+      "command": [],
       "environment": [],
       "mountPoints": [],
       "volumesFrom": [],
