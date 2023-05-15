@@ -126,7 +126,7 @@ export class UserController {
   @Post('device')
   async deviceRegistration(@Headers() headers: any, @Body() body: any, @Res() res: Response) {
     try {
-      console.log(headers.user);
+      console.log('deviceRegistration Body', body);
       const userInfoResult = await this.naverCloudService.deviceTokenRegistration(
         headers.user.id,
         body.deviceType,
