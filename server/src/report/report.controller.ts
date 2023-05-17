@@ -67,7 +67,10 @@ export class ReportController {
       await this.reportService.prediction(uploadAudioResult.s3_key, textExtractionResult, voice);
 
       const updateReportCategoryResult = await this.reportService.updateReportCategory(report.id);
-      if (updateReportCategoryResult.category !== 'regular') {
+      if (
+        updateReportCategoryResult.category !== 'regular' &&
+        updateReportCategoryResult.user.protectors.length > 0
+      ) {
         const protectorIds = updateReportCategoryResult.user.protectors.map((p) => `${p.id}`);
         const notificationData: NotificationDTO = {
           protectorIds,
