@@ -30,7 +30,7 @@ export class PushNotificationConsumer {
         job.data,
       )}.`,
     );
-    console.log(`Failed Reason is ${job.failedReason}`);
+    console.log(`Failed Reason is ${JSON.stringify(job.failedReason)}`);
   }
 
   @OnQueueCompleted()
