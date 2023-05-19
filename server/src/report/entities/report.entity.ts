@@ -1,4 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, OneToOne, JoinColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  ManyToOne,
+  OneToOne,
+  JoinColumn,
+  OneToMany,
+} from 'typeorm';
 import { Location } from '../../location/entities/location.entity';
 import { User } from '../../user/entities/user.entity';
 import { CategoryEnum } from './Enums';
@@ -24,13 +33,19 @@ export class Report {
   @CreateDateColumn()
   created_at: Date;
 
-  @ManyToOne(() => User, (user) => user.reports)
+  @ManyToOne(() => User, (user) => user.reports, {
+    onDelete: 'CASCADE',
+  })
   user: User;
 
-  @OneToOne(() => Location, (location) => location.report)
+  @OneToOne(() => Location, (location) => location.report, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   location: Location;
 
-  @OneToMany(() => Voice, (voice) => voice.report)
+  @OneToMany(() => Voice, (voice) => voice.report, {
+    cascade: true,
+  })
   voices: Voice[];
 }

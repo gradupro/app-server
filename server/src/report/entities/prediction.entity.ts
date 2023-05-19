@@ -24,7 +24,9 @@ export class Prediction {
   @Column('simple-array')
   text_feature: number[];
 
-  @OneToOne(() => Voice, (voice) => voice.prediction)
+  @OneToOne(() => Voice, (voice) => voice.prediction, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   voice: Voice;
 }

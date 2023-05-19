@@ -1,4 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, Unique, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  Unique,
+  OneToMany,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Report } from '../../report/entities/report.entity';
 
 @Entity('USER')
@@ -16,13 +25,19 @@ export class User {
   @CreateDateColumn()
   created_at: Date;
 
-  @OneToMany(() => Report, (report) => report.user)
+  @OneToMany(() => Report, (report) => report.user, {
+    cascade: true,
+  })
   reports: Report[];
 
-  @OneToMany(() => UserProtector, (userProtector) => userProtector.protector)
+  @OneToMany(() => UserProtector, (userProtector) => userProtector.protector, {
+    cascade: true,
+  })
   wards: UserProtector[];
 
-  @OneToMany(() => UserProtector, (userProtector) => userProtector.ward)
+  @OneToMany(() => UserProtector, (userProtector) => userProtector.ward, {
+    cascade: true,
+  })
   protectors: UserProtector[];
 }
 @Entity()
@@ -36,11 +51,15 @@ export class UserProtector {
   @CreateDateColumn()
   request_date: Date;
 
-  @ManyToOne(() => User, (user) => user.protectors)
+  @ManyToOne(() => User, (user) => user.protectors, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'wardId' })
   ward: User;
 
-  @ManyToOne(() => User, (user) => user.wards)
+  @ManyToOne(() => User, (user) => user.wards, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'protectorId' })
   protector: User;
 }

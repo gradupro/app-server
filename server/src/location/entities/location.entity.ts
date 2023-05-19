@@ -1,4 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToOne, UpdateDateColumn, Point, LineString } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  OneToOne,
+  UpdateDateColumn,
+  Point,
+  LineString,
+} from 'typeorm';
 import { Report } from '../../report/entities/report.entity';
 
 @Entity('LOCATION')
@@ -24,6 +33,8 @@ export class Location {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @OneToOne(() => Report, (report) => report.location)
+  @OneToOne(() => Report, (report) => report.location, {
+    onDelete: 'CASCADE',
+  })
   report: Report;
 }
