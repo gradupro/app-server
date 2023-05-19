@@ -13,9 +13,13 @@ export class Voice {
   @Column({ length: 1000 })
   note: string;
 
-  @ManyToOne(() => Report, (report) => report.voices)
+  @ManyToOne(() => Report, (report) => report.voices, {
+    onDelete: 'CASCADE',
+  })
   report: Report;
 
-  @OneToOne(() => Prediction, (prediction) => prediction.voice)
+  @OneToOne(() => Prediction, (prediction) => prediction.voice, {
+    onDelete: 'CASCADE',
+  })
   prediction: Prediction;
 }
