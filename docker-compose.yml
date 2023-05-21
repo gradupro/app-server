@@ -35,7 +35,5 @@ services:
       - 3030:3030
     environment:
       TZ: Asia/Seoul
-    env_file:
-      - ./server/.env
     networks:
       - server
