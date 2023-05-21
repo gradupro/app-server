@@ -100,7 +100,7 @@ export class UserService {
     }
   }
 
-  async requestProtector(userId: number, protectorId: number): Promise<any> {
+  async requestProtector(userId: number, phone_number: string): Promise<any> {
     try {
       const user = await this.userRepository.findOne({
         where: {
@@ -113,7 +113,7 @@ export class UserService {
 
       const protector = await this.userRepository.findOne({
         where: {
-          id: protectorId,
+          phone_number: phone_number,
         },
         relations: {
           wards: true,

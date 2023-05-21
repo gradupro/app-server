@@ -61,10 +61,10 @@ export class UserController {
     try {
       const requestProtectorResult = await this.userService.requestProtector(
         headers.user.id,
-        requestProtectorDTO.protectorId,
+        requestProtectorDTO.phone_number,
       );
       const notificationData: NotificationDTO = {
-        protectorIds: [requestProtectorDTO.protectorId.toString()],
+        protectorIds: [requestProtectorResult.protector.id.toString()],
         requesterName: requestProtectorResult.user.name,
       };
       await this.pushNotificationService.addJob(notificationData);

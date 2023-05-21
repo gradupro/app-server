@@ -1,9 +1,10 @@
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsMobilePhone, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class RequestProtectorDTO {
   @IsNotEmpty()
-  @IsNumber()
-  readonly protectorId: number;
+  @IsString()
+  @IsMobilePhone('ko-KR')
+  readonly phone_number: string;
 }
 
 export class AllowRequestProtectorDTO {
