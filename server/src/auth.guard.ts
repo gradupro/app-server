@@ -1,12 +1,21 @@
 import { Request } from 'express';
-import { CanActivate, ExecutionContext, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { User } from './user/entities/user.entity';
 import { AuthService } from './auth/auth.service';
 import { UserService } from './user/user.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly authService: AuthService, private readonly userService: UserService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UserService,
+  ) {}
 
   async canActivate(context: ExecutionContext) {
     try {
@@ -14,11 +23,19 @@ export class AuthGuard implements CanActivate {
       const userId = this.validateRequest(request);
       const user: User = await this.userService.getUserInfo(userId);
       if (!user) {
-        return false;
+        throw new HttpException(
+          {
+            status: HttpStatus.UNAUTHORIZED,
+            message: ["Can't find User By Id"],
+            error: 'UNAUTHORIZED',
+          },
+          HttpStatus.UNAUTHORIZED,
+        );
       }
       request.headers.user = { id: user.id };
       return true;
     } catch (e) {
+      console.log(e);
       throw e;
     }
   }
@@ -29,6 +46,7 @@ export class AuthGuard implements CanActivate {
       const { userId } = this.authService.verify(jwtString);
       return userId;
     } catch (e) {
+      console.log(e);
       if (e instanceof TypeError) {
         throw new HttpException(
           {

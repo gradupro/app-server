@@ -12,8 +12,9 @@ import {
   Get,
   Param,
   DefaultValuePipe,
+  UploadedFiles,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { AuthGuard } from '../auth.guard';
 import { UserService } from '../user/user.service';
@@ -34,6 +35,67 @@ export class ReportController {
 
   @UseGuards(AuthGuard)
   @Post('')
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'audio', maxCount: 12 }]))
+  async uploadMultiAudio(
+    @Headers() headers: any,
+    @UploadedFiles() files: { audio: Express.Multer.File[] },
+    @Res() res: Response,
+  ) {
+    try {
+      console.log('files', files);
+      const user = await this.userService.getUserInfo(headers.user.id);
+      const report = await this.reportService.createReport(user);
+      console.log('report', report);
+
+      for await (const file of files.audio) {
+        const uploadAudioResult = await this.reportService.uploadAudio(
+          file.buffer,
+          file.originalname,
+        );
+        console.log(uploadAudioResult);
+        console.log('uploadAudioResult', uploadAudioResult);
+        const textExtractionResult = await this.reportService.textExtraction(
+          uploadAudioResult,
+          report,
+        );
+        console.log('textExtractionResult', textExtractionResult);
+
+        const voice = await this.reportService.createVoice(
+          uploadAudioResult.fileUrl,
+          textExtractionResult,
+          report,
+        );
+
+        await this.reportService.prediction(uploadAudioResult.s3_key, textExtractionResult, voice);
+      }
+
+      const updateReportCategoryResult = await this.reportService.updateReportCategory(report.id);
+      if (
+        updateReportCategoryResult.category !== 'regular' &&
+        updateReportCategoryResult.user.protectors.length > 0
+      ) {
+        const protectorIds = updateReportCategoryResult.user.protectors.map((p) => `${p.id}`);
+        const notificationData: NotificationDTO = {
+          protectorIds,
+          reportType: updateReportCategoryResult.category,
+          reporterName: updateReportCategoryResult.user.name,
+        };
+        await this.pushNotificationService.addJob(notificationData);
+      }
+
+      return res.status(HttpStatus.CREATED).json({
+        status: HttpStatus.CREATED,
+        data: updateReportCategoryResult,
+      });
+    } catch (e) {
+      console.log(e);
+      return res.status(e.status).json(e.response);
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('')
+  //@UseInterceptors(FileFieldsInterceptor([{ name: 'audio', maxCount: 12 }]))
   @UseInterceptors(FileInterceptor('file'))
   async uploadAudio(
     @Headers() headers: any,
@@ -42,30 +104,39 @@ export class ReportController {
   ) {
     try {
       console.log('file', file);
-
       const user = await this.userService.getUserInfo(headers.user.id);
       const report = await this.reportService.createReport(user);
       console.log('report', report);
-      const uploadAudioResult = await this.reportService.uploadAudio(
-        file.buffer,
-        file.originalname,
-      );
+      const audioDuration = await this.reportService.getAudioDuration(file);
+      console.log('AudioDuration', audioDuration);
+      let startPointList: number[] = [];
+      for (let i = 0; i < Math.ceil(audioDuration / 5); i++) {
+        startPointList.push(i * 5);
+      }
+      console.log(startPointList);
+      for await (const startPoint of startPointList) {
+        const sliceAudioResult = await this.reportService.sliceAudio(file, startPoint, 5);
+        console.log('sliceAudioResult', sliceAudioResult);
+        const uploadAudioResult = await this.reportService.uploadAudio(
+          sliceAudioResult,
+          `${startPointList.indexOf(startPoint)}_${file.originalname}`,
+        );
+        console.log(uploadAudioResult);
+        console.log('uploadAudioResult', uploadAudioResult);
+        const textExtractionResult = await this.reportService.textExtraction(
+          uploadAudioResult,
+          report,
+        );
+        console.log('textExtractionResult', textExtractionResult);
 
-      console.log('uploadAudioResult', uploadAudioResult);
-      const textExtractionResult = await this.reportService.textExtraction(
-        uploadAudioResult,
-        report,
-      );
-      console.log('textExtractionResult', textExtractionResult);
+        const voice = await this.reportService.createVoice(
+          uploadAudioResult.fileUrl,
+          textExtractionResult,
+          report,
+        );
 
-      const voice = await this.reportService.createVoice(
-        uploadAudioResult.fileUrl,
-        textExtractionResult,
-        report,
-      );
-
-      await this.reportService.prediction(uploadAudioResult.s3_key, textExtractionResult, voice);
-
+        await this.reportService.prediction(uploadAudioResult.s3_key, textExtractionResult, voice);
+      }
       const updateReportCategoryResult = await this.reportService.updateReportCategory(report.id);
       if (
         updateReportCategoryResult.category !== 'regular' &&
@@ -84,6 +155,7 @@ export class ReportController {
         data: updateReportCategoryResult,
       });
     } catch (e) {
+      console.log(e);
       return res.status(e.status).json(e.response);
     }
   }
