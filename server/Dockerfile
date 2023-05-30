@@ -79,6 +79,10 @@ RUN npm cache clean --force
 RUN npm install -g pm2
 RUN npm install -g dotenv-cli
 
+
+RUN apt-get -y update
+RUN apt-get -y upgrade
+RUN apt-get install -y ffmpeg
 # Install app dependencies
 RUN npm install --include=dev
 

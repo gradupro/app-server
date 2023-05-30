@@ -103,6 +103,7 @@ export class AuthService {
         userId: id,
       };
     } catch (e) {
+      console.log(e);
       throw new HttpException(
         {
           status: HttpStatus.UNAUTHORIZED,

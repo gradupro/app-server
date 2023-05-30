@@ -22,6 +22,11 @@ import { User } from '../user/entities/user.entity';
 import { CategoryEnum } from './entities/Enums';
 import { ReportType } from './entities/Enums';
 
+const AudioContext = require('web-audio-engine').StreamAudioContext;
+import { Writable } from 'stream';
+const stream = require('stream');
+var ffmpeg = require('fluent-ffmpeg');
+
 @Injectable()
 export class ReportService {
   private readonly s3: AWS.S3;
@@ -52,6 +57,78 @@ export class ReportService {
 
       await this.reportRepository.save(newReport);
       return newReport;
+    } catch (e) {
+      console.log(e);
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: [e.message.split('\n')[0]],
+          error: 'INTERNAL_SERVER_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getAudioDuration(audioFile: Express.Multer.File): Promise<any> {
+    try {
+      const context = new AudioContext();
+      const audioBuffer = await context.decodeAudioData(audioFile.buffer);
+      return audioBuffer.duration;
+    } catch (e) {
+      console.log(e);
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: [e.message.split('\n')[0]],
+          error: 'INTERNAL_SERVER_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async sliceAudio(
+    audioFile: Express.Multer.File,
+    startTime: number,
+    duration: number,
+  ): Promise<any> {
+    try {
+      return new Promise((resolve, reject) => {
+        const outputBuffer = [];
+        const outputStream = new Writable({
+          write(chunk, encoding, callback) {
+            outputBuffer.push(chunk);
+            callback();
+          },
+        });
+        ffmpeg({
+          source: stream.Readable.from(audioFile.buffer, { objectMode: false }),
+        })
+          .setStartTime(startTime)
+          .setDuration(duration)
+          .outputOptions(['-f s16le', '-acodec pcm_s16le'])
+          .toFormat('wav')
+          .output(outputStream)
+          .on('start', (command) => console.log('FFmpeg command:', command))
+          .on('data', (chunk) => {
+            console.log('data chunking');
+            outputBuffer.push(chunk);
+          })
+          .on('progress', function (progress) {
+            console.log(progress);
+          })
+          .on('end', () => {
+            console.log('end');
+            resolve(Buffer.concat(outputBuffer));
+          })
+          .on('error', (err, stdout, stderr) => {
+            console.log(err);
+            console.log(stderr);
+            console.log(stdout);
+          })
+          .run();
+      });
     } catch (e) {
       console.log(e);
       throw new HttpException(
