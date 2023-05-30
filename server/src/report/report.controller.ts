@@ -34,7 +34,7 @@ export class ReportController {
   ) {}
 
   @UseGuards(AuthGuard)
-  @Post('')
+  @Post('multiVoice')
   @UseInterceptors(FileFieldsInterceptor([{ name: 'audio', maxCount: 12 }]))
   async uploadMultiAudio(
     @Headers() headers: any,
