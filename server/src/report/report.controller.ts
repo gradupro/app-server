@@ -24,6 +24,7 @@ import { PushNotificationService } from '../pushNotification/pushNotification.se
 import { NotificationDTO } from '../pushNotification/dto/notification.dto';
 import { EnumValidationPipe } from '../enum.validate';
 import { ReportType } from './entities/Enums';
+import { SocketGateway } from '../socket/socket.gateway';
 
 @Controller('report')
 export class ReportController {
@@ -31,8 +32,10 @@ export class ReportController {
     private readonly reportService: ReportService,
     private readonly userService: UserService,
     private readonly pushNotificationService: PushNotificationService,
+    private readonly socketGateWay: SocketGateway,
   ) {}
 
+  /*
   @UseGuards(AuthGuard)
   @Post('multiVoice')
   @UseInterceptors(FileFieldsInterceptor([{ name: 'audio', maxCount: 12 }]))
@@ -92,6 +95,7 @@ export class ReportController {
       return res.status(e.status).json(e.response);
     }
   }
+  */
 
   @UseGuards(AuthGuard)
   @Post('')
@@ -104,8 +108,12 @@ export class ReportController {
   ) {
     try {
       console.log('file', file);
+      const uploadOriginalAudioResult = await this.reportService.uploadAudio(
+        file.buffer,
+        file.originalname,
+      );
       const user = await this.userService.getUserInfo(headers.user.id);
-      const report = await this.reportService.createReport(user);
+      const report = await this.reportService.createReport(user, uploadOriginalAudioResult.fileUrl);
       console.log('report', report);
       const audioDuration = await this.reportService.getAudioDuration(file);
       console.log('AudioDuration', audioDuration);
@@ -137,22 +145,20 @@ export class ReportController {
 
         await this.reportService.prediction(uploadAudioResult.s3_key, textExtractionResult, voice);
       }
-      const updateReportCategoryResult = await this.reportService.updateReportCategory(report.id);
-      if (
-        updateReportCategoryResult.category !== 'regular' &&
-        updateReportCategoryResult.user.protectors.length > 0
-      ) {
-        const protectorIds = updateReportCategoryResult.user.protectors.map((p) => `${p.id}`);
+      const reportResult = await this.reportService.getOne(report.id, true);
+      console.log('updateReportCategoryResult', reportResult.categories);
+      if (!reportResult.categories.allIsRegular && reportResult.user.protectors.length > 0) {
+        const protectorIds = reportResult.user.protectors.map((p) => `${p.id}`);
         const notificationData: NotificationDTO = {
           protectorIds,
-          reportType: updateReportCategoryResult.category,
-          reporterName: updateReportCategoryResult.user.name,
+          reportType: reportResult.categories.mostCategory,
+          reporterName: reportResult.user.name,
         };
         await this.pushNotificationService.addJob(notificationData);
       }
       return res.status(HttpStatus.CREATED).json({
         status: HttpStatus.CREATED,
-        data: updateReportCategoryResult,
+        data: reportResult,
       });
     } catch (e) {
       console.log(e);
@@ -160,6 +166,7 @@ export class ReportController {
     }
   }
 
+  /*
   @UseGuards(AuthGuard)
   @Put('')
   @UseInterceptors(FileInterceptor('file'))
@@ -203,7 +210,7 @@ export class ReportController {
       return res.status(e.status).json(e.response);
     }
   }
-
+  */
   @UseGuards(AuthGuard)
   @Put('interrupt')
   async updateReportInterrupt(@Headers() headers: any, @Query() query: any, @Res() res: Response) {
@@ -260,6 +267,11 @@ export class ReportController {
   async getReport(@Headers() headers: any, @Query('id') reportId: number, @Res() res: Response) {
     try {
       const report = await this.reportService.getOne(reportId, true);
+      /* connect과 join_room은 클라이언트에서
+      const roomName = `${reportId}`;
+      const joinRoomPayload = { userId: headers.user.id, reportId: reportId };
+      this.socketGateWay.handleSetClientDataEvent(joinRoomPayload);
+      */
       return res.status(HttpStatus.OK).json({
         status: HttpStatus.OK,
         data: report,

@@ -24,8 +24,8 @@ export class Report {
   @Column({ default: false })
   reporter_interruption: boolean;
 
-  @Column({ type: 'enum', name: 'category', enum: CategoryEnum, default: CategoryEnum.regular })
-  category: CategoryEnum;
+  @Column({ length: 1000 })
+  original_sound_url: string;
 
   @Column({ nullable: true, default: null })
   end_at: Date;

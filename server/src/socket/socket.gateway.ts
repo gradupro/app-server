@@ -10,8 +10,6 @@ import { Logger } from '@nestjs/common';
 import { ServerToClientEvents, ClientToServerEvents, Message, JoinRoom } from './socket.interface';
 import { Server, Socket } from 'socket.io';
 
-import { SocketService } from './socket.service';
-
 @WebSocketGateway(3030, {
   transports: ['websocket'],
   cors: {
@@ -19,7 +17,7 @@ import { SocketService } from './socket.service';
   },
 })
 export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  constructor(private socketService: SocketService) {}
+  constructor() {}
 
   @WebSocketServer() server: Server = new Server<ServerToClientEvents, ClientToServerEvents>();
 
