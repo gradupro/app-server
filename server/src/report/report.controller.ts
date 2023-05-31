@@ -121,15 +121,19 @@ export class ReportController {
       for (let i = 0; i < Math.ceil(audioDuration / 5); i++) {
         startPointList.push(i * 5);
       }
-      console.log(startPointList);
+      console.log('startPointList', startPointList);
       for await (const startPoint of startPointList) {
-        const sliceAudioResult = await this.reportService.sliceAudio(file, startPoint, 5);
+        console.log('startPoint', startPoint);
+        const sliceAudioResult = await this.reportService.sliceAudio(
+          uploadOriginalAudioResult.fileUrl,
+          startPoint,
+          5,
+        );
         console.log('sliceAudioResult', sliceAudioResult);
         const uploadAudioResult = await this.reportService.uploadAudio(
           sliceAudioResult,
           `${startPointList.indexOf(startPoint)}_${file.originalname}`,
         );
-        console.log(uploadAudioResult);
         console.log('uploadAudioResult', uploadAudioResult);
         const textExtractionResult = await this.reportService.textExtraction(
           uploadAudioResult,

@@ -88,11 +88,7 @@ export class ReportService {
     }
   }
 
-  async sliceAudio(
-    audioFile: Express.Multer.File,
-    startTime: number,
-    duration: number,
-  ): Promise<any> {
+  async sliceAudio(audioFileUrl: string, startTime: number, duration: number): Promise<any> {
     try {
       return new Promise((resolve, reject) => {
         const outputBuffer = [];
@@ -102,9 +98,7 @@ export class ReportService {
             callback();
           },
         });
-        ffmpeg({
-          source: stream.Readable.from(audioFile.buffer, { objectMode: false }),
-        })
+        ffmpeg(audioFileUrl)
           .setStartTime(startTime)
           .setDuration(duration)
           .outputOptions(['-f s16le', '-acodec pcm_s16le'])
@@ -291,13 +285,10 @@ export class ReportService {
         s3Object,
         report,
       );
-      console.log('transcriptionJobResponse', transcriptionJobResponse); //TranscriptionJobName
       const successTranscribe = await this.getTranscribeResult(
         transcribeClient,
         transcriptionJobResponse.TranscriptionJobName,
       );
-      console.log('successTranscribe', successTranscribe); //Transcript.TranscriptFileUri
-      console.log(successTranscribe.TranscriptionJobName);
       const script = await this.getTranscriptFile(successTranscribe.TranscriptionJobName);
       return script; // results.transcripts[0].transcript
     } catch (e) {
