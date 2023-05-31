@@ -391,6 +391,7 @@ export class ReportService {
   async getOne(reportId: number, api: boolean): Promise<any> {
     try {
       let relations: any;
+      let categories = null;
       if (api) {
         relations = {
           voices: {
@@ -409,7 +410,10 @@ export class ReportService {
         },
         relations: relations,
       });
-      return { ...report, categories: this.categoriesStatistic(report.voices) };
+      if (api) {
+        categories = this.categoriesStatistic(report.voices);
+      }
+      return { ...report, categories };
     } catch (e) {
       console.log(e);
       throw new HttpException(
