@@ -360,7 +360,7 @@ export class ReportService {
         newPrediction.audio_feature = mlServerResult.audio_feature;
         newPrediction.text_label = mlServerResult.text_label;
         newPrediction.text_feature = mlServerResult.text_feature;
-        newPrediction.combined_feature = mlServerResult.combined_feature;
+        newPrediction.combined_probabilities = mlServerResult.combined_probabilities;
         newPrediction.combined_label = mlServerResult.combined_label;
 
         await this.predictionRepository.save(newPrediction);
