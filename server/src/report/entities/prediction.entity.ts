@@ -10,7 +10,7 @@ export class Prediction {
   combined_label: string;
 
   @Column('simple-array')
-  combined_probabilities: number[];
+  combined_feature: number[];
 
   @Column({ length: 300 })
   audio_label: string;

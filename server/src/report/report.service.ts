@@ -50,11 +50,11 @@ export class ReportService {
     this.s3 = new AWS.S3();
   }
 
-  async createReport(user: User): Promise<Report> {
+  async createReport(user: User, original_sound_url: string): Promise<Report> {
     try {
       const newReport = new Report();
       newReport.user = user;
-
+      newReport.original_sound_url = original_sound_url;
       await this.reportRepository.save(newReport);
       return newReport;
     } catch (e) {
@@ -360,7 +360,7 @@ export class ReportService {
         newPrediction.audio_feature = mlServerResult.audio_feature;
         newPrediction.text_label = mlServerResult.text_label;
         newPrediction.text_feature = mlServerResult.text_feature;
-        newPrediction.combined_probabilities = mlServerResult.combined_probabilities;
+        newPrediction.combined_feature = mlServerResult.combined_feature;
         newPrediction.combined_label = mlServerResult.combined_label;
 
         await this.predictionRepository.save(newPrediction);
@@ -388,14 +388,16 @@ export class ReportService {
     }
   }
 
-  async getOne(reportId: number, api: boolean): Promise<Report> {
+  async getOne(reportId: number, api: boolean): Promise<any> {
     try {
       let relations: any;
       if (api) {
         relations = {
-          user: true,
           voices: {
             prediction: true,
+          },
+          user: {
+            protectors: true,
           },
         };
       } else {
@@ -407,8 +409,7 @@ export class ReportService {
         },
         relations: relations,
       });
-
-      return report;
+      return { ...report, categories: this.categoriesStatistic(report.voices) };
     } catch (e) {
       console.log(e);
       throw new HttpException(
@@ -422,7 +423,7 @@ export class ReportService {
     }
   }
 
-  async getMany(userId: number, type: ReportType): Promise<Report[]> {
+  async getMany(userId: number, type: ReportType): Promise<any> {
     try {
       let reports: Report[];
       if (type === ReportType.PROTECT) {
@@ -462,7 +463,11 @@ export class ReportService {
           },
         });
       }
-      return reports;
+      let updateReports = [];
+      reports.forEach((r) =>
+        updateReports.push({ ...r, categories: this.categoriesStatistic(r.voices) }),
+      );
+      return updateReports;
     } catch (e) {
       console.log(e);
       throw new HttpException(
@@ -476,7 +481,49 @@ export class ReportService {
     }
   }
 
-  async updateReportCategory(reportId: number): Promise<Report> {
+  private categoriesStatistic(voices: Voice[]): any {
+    try {
+      let categoryList: CategoryEnum[] = voices.map(
+        (v) => CategoryEnum[v.prediction.combined_label],
+      );
+      let categoriesRatio = {};
+      const countedCategories = categoryList.reduce((allCategories, category) => {
+        if (category in allCategories) {
+          allCategories[category]++;
+        } else {
+          allCategories[category] = 1;
+        }
+        categoriesRatio[category] = `${Math.round(
+          (allCategories[category] / categoryList.length) * 100,
+        )}%`;
+        return allCategories;
+      }, {});
+      const categoriesSorted = Object.keys(countedCategories).sort((a, b) => {
+        return countedCategories[a] - countedCategories[b];
+      });
+      const allIsRegular = categoryList.length === countedCategories['regular'];
+      return {
+        categoryList,
+        allIsRegular,
+        countedCategories,
+        categoriesRatio,
+        mostCategory: categoriesSorted.at(-1),
+      };
+    } catch (e) {
+      console.log(e);
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: [e.message.split('\n')[0]],
+          error: 'INTERNAL_SERVER_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /*
+  async updateReportCategory(reportId: number): Promise<any> {
     try {
       const report = await this.reportRepository.findOne({
         where: {
@@ -491,15 +538,8 @@ export class ReportService {
           },
         },
       });
-      let updatedCategory: string;
-      report.voices.forEach((v) => {
-        if (v.prediction.combined_label !== 'regular') {
-          updatedCategory = v.prediction.combined_label;
-        }
-      });
-      report.category = CategoryEnum[updatedCategory];
       await this.reportRepository.save(report);
-      return report;
+      return this.categoriesStatistic(report.voices);
     } catch (e) {
       console.log(e);
       throw new HttpException(
@@ -512,6 +552,7 @@ export class ReportService {
       );
     }
   }
+  */
 
   async updateReportInterrupt(reportId: number, role: string): Promise<Report> {
     try {
