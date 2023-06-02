@@ -50,12 +50,16 @@ export class LocationService {
       const updatedLocation = await this.locationRepository.findOne({
         where: { id: body.locationId },
       });
-      const start_pointJson = JSON.parse(JSON.stringify(Geometry.parse(`SRID=4326;${updatedLocation.start_point}`).toGeoJSON()));
+      const start_pointJson = JSON.parse(
+        JSON.stringify(Geometry.parse(`SRID=4326;${updatedLocation.start_point}`).toGeoJSON()),
+      );
       const start_point = start_pointJson.coordinates;
       console.log(updatedLocation.route);
       let routeData: Point[] = [];
       if (updatedLocation.route) {
-        const routeJSON = JSON.parse(JSON.stringify(Geometry.parse(`SRID=4326;${updatedLocation.route}`).toGeoJSON()));
+        const routeJSON = JSON.parse(
+          JSON.stringify(Geometry.parse(`SRID=4326;${updatedLocation.route}`).toGeoJSON()),
+        );
         const preRoute = routeJSON.coordinates;
         console.log('preRoute', preRoute);
         preRoute.push([longitude, latitude]);
@@ -66,7 +70,7 @@ export class LocationService {
       console.log('routeData', routeData);
       const route: string = routeData.map((p) => `${p[0]} ${p[1]}`).join(',');
       console.log(route);
-      const createdLocation = await this.locationRepository
+      await this.locationRepository
         .createQueryBuilder()
         .update()
         .set({
@@ -75,7 +79,9 @@ export class LocationService {
         })
         .where('id = :id', { id: body.locationId })
         .execute();
-      return createdLocation;
+      return {
+        route: routeData,
+      };
     } catch (e) {
       console.log(e);
       throw new HttpException(

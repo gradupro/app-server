@@ -39,7 +39,7 @@ export class LocationController {
       this.socketGateWay.handleSetClientDataEvent(joinRoomPayload);
       const chatPayload: Message = {
         userId: headers.user.id,
-        message: body.payload,
+        body: body.payload,
         roomName: roomName,
       };
       const message = this.socketGateWay.handleChatEvent(chatPayload);
@@ -74,14 +74,13 @@ export class LocationController {
         this.socketGateWay.handleSetClientDataEvent(joinRoomPayload);
         const chatPayload: Message = {
           userId: headers.user.id,
-          message: body.payload,
+          body: updatedLocationResult,
           roomName: roomName,
         };
         const message = this.socketGateWay.handleChatEvent(chatPayload);
         console.log('message', message);
         status = HttpStatus.OK;
         data = {
-          updatedLocationResult,
           message,
         };
       }
