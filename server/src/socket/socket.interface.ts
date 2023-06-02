@@ -14,7 +14,7 @@ export interface JoinRoom {
 
 export interface Message {
   userId: number;
-  message: Object;
+  body: Object;
   roomName: string;
 }
 
