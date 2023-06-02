@@ -24,7 +24,6 @@ import { ReportType } from './entities/Enums';
 
 const AudioContext = require('web-audio-engine').StreamAudioContext;
 import { Writable } from 'stream';
-const stream = require('stream');
 var ffmpeg = require('fluent-ffmpeg');
 
 @Injectable()
@@ -559,6 +558,34 @@ export class ReportService {
       report[`${role}_interruption`] = true;
       await this.reportRepository.save(report);
       return report;
+    } catch (e) {
+      console.log(e);
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: [e.message.split('\n')[0]],
+          error: 'INTERNAL_SERVER_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getReportInterrupt(reportId: number): Promise<boolean> {
+    try {
+      const report = await this.reportRepository.findOne({
+        where: {
+          id: reportId,
+        },
+      });
+      console.log(report);
+      let interruption: boolean;
+      if (report.protector_interruption && report.reporter_interruption) {
+        interruption = true;
+      } else {
+        interruption = false;
+      }
+      return interruption;
     } catch (e) {
       console.log(e);
       throw new HttpException(
