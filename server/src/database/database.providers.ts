@@ -12,7 +12,7 @@ export const databaseProviders = [
         type: 'mysql',
         host: configService.get('DATABASE_HOST'),
         port: 3306,
-        timezone: '+09:00',
+        timezone: 'Asia/Seoul',
         charset: 'utf8mb4_general_ci',
         logging: true,
         username: configService.get('DATABASE_USER'),

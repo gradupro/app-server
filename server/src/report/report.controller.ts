@@ -115,8 +115,11 @@ export class ReportController {
       const user = await this.userService.getUserInfo(headers.user.id);
       const report = await this.reportService.createReport(user, uploadOriginalAudioResult.fileUrl);
       console.log('report', report);
+      console.time('audioDuration');
       const audioDuration = await this.reportService.getAudioDuration(file);
       console.log('AudioDuration', audioDuration);
+      console.timeEnd('audioDuration');
+      console.time('sliceAudio');
       let startPointList: number[] = [];
       for (let i = 0; i < Math.ceil(audioDuration / 5); i++) {
         startPointList.push(i * 5);
@@ -129,25 +132,31 @@ export class ReportController {
           startPoint,
           5,
         );
+        console.timeEnd('sliceAudio');
         console.log('sliceAudioResult', sliceAudioResult);
+        console.time('uploadAudio');
         const uploadAudioResult = await this.reportService.uploadAudio(
           sliceAudioResult,
           `${startPointList.indexOf(startPoint)}_${file.originalname}`,
         );
         console.log('uploadAudioResult', uploadAudioResult);
+        console.timeEnd('uploadAudio');
+        console.time('textExtraction');
         const textExtractionResult = await this.reportService.textExtraction(
           uploadAudioResult,
           report,
         );
         console.log('textExtractionResult', textExtractionResult);
+        console.timeEnd('textExtraction');
 
         const voice = await this.reportService.createVoice(
           uploadAudioResult.fileUrl,
           textExtractionResult,
           report,
         );
-
+        console.time('prediction');
         await this.reportService.prediction(uploadAudioResult.s3_key, textExtractionResult, voice);
+        console.timeEnd('prediction');
       }
       const reportResult = await this.reportService.getOne(report.id, true);
       console.log('updateReportCategoryResult', reportResult.categories);

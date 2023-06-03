@@ -74,6 +74,22 @@ export class ReportService {
       const context = new AudioContext();
       const audioBuffer = await context.decodeAudioData(audioFile.buffer);
       return audioBuffer.duration;
+      /*
+      return new Promise((resolve, reject) => {
+        ffmpeg(filePath).ffprobe((err, metadata) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (!(metadata && metadata.streams && metadata.format && metadata.format.duration)) {
+            reject(new Error(`Fail to parse metadata`));
+            return;
+          }
+          const duration = metadata.format.duration;
+          resolve(duration);
+        });
+      });
+      */
     } catch (e) {
       console.log(e);
       throw new HttpException(
@@ -382,6 +398,7 @@ export class ReportService {
     try {
       let relations: any;
       let categories = null;
+      let interruption: boolean;
       if (api) {
         relations = {
           voices: {
@@ -402,8 +419,13 @@ export class ReportService {
       });
       if (api) {
         categories = this.categoriesStatistic(report.voices);
+        if (report.protector_interruption && report.reporter_interruption) {
+          interruption = true;
+        } else {
+          interruption = false;
+        }
       }
-      return { ...report, categories };
+      return { ...report, interruption, categories };
     } catch (e) {
       console.log(e);
       throw new HttpException(
@@ -458,9 +480,23 @@ export class ReportService {
         });
       }
       let updateReports = [];
-      reports.forEach((r) =>
-        updateReports.push({ ...r, categories: this.categoriesStatistic(r.voices) }),
-      );
+      reports.forEach((r) => {
+        let interruption: boolean;
+        if (r.protector_interruption && r.reporter_interruption) {
+          interruption = true;
+        } else {
+          interruption = false;
+        }
+        const categories = this.categoriesStatistic(r.voices);
+        delete r.voices;
+        delete r.protector_interruption;
+        delete r.reporter_interruption;
+        updateReports.push({
+          ...r,
+          interruption: interruption,
+          categories: categories,
+        });
+      });
       return updateReports;
     } catch (e) {
       console.log(e);
@@ -556,6 +592,7 @@ export class ReportService {
         },
       });
       report[`${role}_interruption`] = true;
+      report.end_at = new Date();
       await this.reportRepository.save(report);
       return report;
     } catch (e) {
