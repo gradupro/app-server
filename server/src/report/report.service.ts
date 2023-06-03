@@ -424,8 +424,10 @@ export class ReportService {
         } else {
           interruption = false;
         }
+        return { ...report, interruption, categories };
+      } else {
+        return report;
       }
-      return { ...report, interruption, categories };
     } catch (e) {
       console.log(e);
       throw new HttpException(
