@@ -80,15 +80,14 @@ export class LocationController {
           roomName: roomName,
         };
         const message = this.socketGateWay.handleChatEvent(chatPayload);
-        console.log('message', message);
         status = HttpStatus.OK;
         data = {
           message,
         };
       }
       return res.status(status).json({
-        status: status,
-        data: data,
+        status,
+        data,
       });
     } catch (e) {
       return res.status(e.status).json(e.response);

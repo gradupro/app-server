@@ -28,7 +28,6 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     instrument(this.server, {
       readonly: true,
       auth: false,
-      mode: 'development',
     });
   }
   private logger = new Logger('SocketGateway');
@@ -48,7 +47,6 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody()
     payload: JoinRoom,
   ) {
-    console.log(payload);
     const roomName = `${payload.reportId}`;
     if (payload.userId) {
       this.logger.log(`${payload.userId} is joining ${roomName}`);

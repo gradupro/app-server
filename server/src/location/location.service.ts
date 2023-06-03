@@ -49,19 +49,16 @@ export class LocationService {
       const updatedLocation = await this.locationRepository.findOne({
         where: { report: { id: body.reportId } },
       });
-      console.log('updatedLocation', updatedLocation);
       const start_pointJson = JSON.parse(
         JSON.stringify(Geometry.parse(`SRID=4326;${updatedLocation.start_point}`).toGeoJSON()),
       );
       const start_point = start_pointJson.coordinates;
-      console.log(updatedLocation.route);
       let routeData: Point[] = [];
       if (updatedLocation.route) {
         const routeJSON = JSON.parse(
           JSON.stringify(Geometry.parse(`SRID=4326;${updatedLocation.route}`).toGeoJSON()),
         );
         const preRoute = routeJSON.coordinates;
-        console.log('preRoute', preRoute);
         preRoute.push([longitude, latitude]);
         routeData = preRoute;
       } else {
