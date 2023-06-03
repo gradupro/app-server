@@ -9,18 +9,28 @@ import {
 import { Logger } from '@nestjs/common';
 import { ServerToClientEvents, ClientToServerEvents, Message, JoinRoom } from './socket.interface';
 import { Server, Socket } from 'socket.io';
+import { instrument } from '@socket.io/admin-ui';
 
 @WebSocketGateway(3030, {
   transports: ['websocket'],
   cors: {
     origin: '*',
+    credentials: true,
   },
 })
 export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor() {}
 
-  @WebSocketServer() server: Server = new Server<ServerToClientEvents, ClientToServerEvents>();
+  @WebSocketServer()
+  server: Server = new Server<ServerToClientEvents, ClientToServerEvents>();
 
+  afterInit() {
+    instrument(this.server, {
+      readonly: true,
+      auth: false,
+      mode: 'development',
+    });
+  }
   private logger = new Logger('SocketGateway');
 
   @SubscribeMessage('chat')
