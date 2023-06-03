@@ -18,6 +18,8 @@ import { AuthGuard } from '../auth.guard';
 import { Request, Response } from 'express';
 import { Message } from '../socket/socket.interface';
 import { ReportService } from 'src/report/report.service';
+import { CreateLocationDto } from './dto/create-location.dto';
+import { UpdateLocationDto } from './dto/update-location.dto';
 
 @Controller('location')
 export class LocationController {
@@ -29,7 +31,7 @@ export class LocationController {
 
   @UseGuards(AuthGuard)
   @Post()
-  async create(@Headers() headers: any, @Body() body: any, @Res() res: Response) {
+  async create(@Headers() headers: any, @Body() body: CreateLocationDto, @Res() res: Response) {
     try {
       const roomName = `${body.reportId}`;
       const createdLocationResult = await this.locationService.create(body);
@@ -55,7 +57,7 @@ export class LocationController {
 
   @UseGuards(AuthGuard)
   @Put()
-  async update(@Headers() headers: any, @Body() body: any, @Res() res: Response) {
+  async update(@Headers() headers: any, @Body() body: UpdateLocationDto, @Res() res: Response) {
     try {
       const roomName = `${body.reportId}`;
       let status: number;
