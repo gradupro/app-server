@@ -33,6 +33,7 @@
       "@nestjs/platform-socket.io": "^9.3.12",
       "@nestjs/typeorm": "^9.0.1",
       "@nestjs/websockets": "^9.3.12",
+      "@socket.io/admin-ui": "^0.5.1",
       "@types/bull": "^4.10.0",
       "@types/geojson": "^7946.0.10",
       "@types/node-wav": "^0.0.0",
