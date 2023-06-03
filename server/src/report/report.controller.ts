@@ -119,7 +119,6 @@ export class ReportController {
       const audioDuration = await this.reportService.getAudioDuration(file);
       console.log('AudioDuration', audioDuration);
       console.timeEnd('audioDuration');
-      console.time('sliceAudio');
       let startPointList: number[] = [];
       for (let i = 0; i < Math.ceil(audioDuration / 5); i++) {
         startPointList.push(i * 5);
@@ -127,6 +126,7 @@ export class ReportController {
       console.log('startPointList', startPointList);
       for await (const startPoint of startPointList) {
         console.log('startPoint', startPoint);
+        console.time('sliceAudio');
         const sliceAudioResult = await this.reportService.sliceAudio(
           uploadOriginalAudioResult.fileUrl,
           startPoint,

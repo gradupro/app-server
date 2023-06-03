@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
   Point,
   LineString,
+  JoinColumn,
 } from 'typeorm';
 import { Report } from '../../report/entities/report.entity';
 
@@ -36,5 +37,6 @@ export class Location {
   @OneToOne(() => Report, (report) => report.location, {
     onDelete: 'CASCADE',
   })
+  @JoinColumn()
   report: Report;
 }

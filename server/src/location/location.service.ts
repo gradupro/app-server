@@ -17,7 +17,6 @@ export class LocationService {
   async create(body: CreateLocationDto) {
     try {
       const { latitude, longitude } = body.payload;
-
       const report = await this.reportService.getOne(body.reportId, false);
       const currentPoint = `${longitude} ${latitude}`;
       const createdLocation = await this.locationRepository
@@ -50,6 +49,7 @@ export class LocationService {
       const updatedLocation = await this.locationRepository.findOne({
         where: { report: { id: body.reportId } },
       });
+      console.log('updatedLocation', updatedLocation);
       const start_pointJson = JSON.parse(
         JSON.stringify(Geometry.parse(`SRID=4326;${updatedLocation.start_point}`).toGeoJSON()),
       );
