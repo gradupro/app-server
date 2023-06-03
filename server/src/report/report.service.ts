@@ -390,7 +390,9 @@ export class ReportService {
             prediction: true,
           },
           user: {
-            protectors: true,
+            protectors: {
+              protector: true,
+            },
           },
         };
       } else {
