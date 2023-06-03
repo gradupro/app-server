@@ -48,7 +48,7 @@ export class LocationService {
       const { latitude, longitude } = body.payload;
       const currentPoint = `${longitude} ${latitude}`;
       const updatedLocation = await this.locationRepository.findOne({
-        where: { id: body.locationId },
+        where: { report: { id: body.reportId } },
       });
       const start_pointJson = JSON.parse(
         JSON.stringify(Geometry.parse(`SRID=4326;${updatedLocation.start_point}`).toGeoJSON()),
@@ -77,7 +77,7 @@ export class LocationService {
           current_point: () => `ST_GeomFromText('POINT(${currentPoint})')`,
           route: () => `ST_GeomFromText('LINESTRING(${route})')`,
         })
-        .where('id = :id', { id: body.locationId })
+        .where('id = :id', { id: updatedLocation.id })
         .execute();
       return {
         route: routeData,
