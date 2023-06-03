@@ -41,7 +41,6 @@ export class Report {
   @OneToOne(() => Location, (location) => location.report, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn()
   location: Location;
 
   @OneToMany(() => Voice, (voice) => voice.report, {

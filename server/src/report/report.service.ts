@@ -21,6 +21,7 @@ import {
 import { User } from '../user/entities/user.entity';
 import { CategoryEnum } from './entities/Enums';
 import { ReportType } from './entities/Enums';
+import { Location } from '../location/entities/location.entity';
 
 const AudioContext = require('web-audio-engine').StreamAudioContext;
 import { Writable } from 'stream';
@@ -617,7 +618,6 @@ export class ReportService {
           id: reportId,
         },
       });
-      console.log(report);
       let interruption: boolean;
       if (report.protector_interruption && report.reporter_interruption) {
         interruption = true;
@@ -625,6 +625,29 @@ export class ReportService {
         interruption = false;
       }
       return interruption;
+    } catch (e) {
+      console.log(e);
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: [e.message.split('\n')[0]],
+          error: 'INTERNAL_SERVER_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async createLocation(reportId: number, location: Location): Promise<Report> {
+    try {
+      const report = await this.reportRepository.findOne({
+        where: {
+          id: reportId,
+        },
+      });
+      report.location = location;
+      await this.reportRepository.save(report);
+      return report;
     } catch (e) {
       console.log(e);
       throw new HttpException(
