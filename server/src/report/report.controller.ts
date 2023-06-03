@@ -161,7 +161,8 @@ export class ReportController {
       const reportResult = await this.reportService.getOne(report.id, true);
       console.log('updateReportCategoryResult', reportResult);
       if (!reportResult.categories.allIsRegular && reportResult.user.protectors.length > 0) {
-        const protectorIds = reportResult.user.protectors.map((p) => `${p.id}`);
+        console.log(reportResult.user.protectors);
+        const protectorIds = reportResult.user.protectors.map((p) => `${p.protector.id}`);
         const notificationData: NotificationDTO = {
           protectorIds,
           reportType: reportResult.categories.mostCategory,
