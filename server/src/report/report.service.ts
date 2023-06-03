@@ -75,22 +75,6 @@ export class ReportService {
       const context = new AudioContext();
       const audioBuffer = await context.decodeAudioData(audioFile.buffer);
       return audioBuffer.duration;
-      /*
-      return new Promise((resolve, reject) => {
-        ffmpeg(filePath).ffprobe((err, metadata) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          if (!(metadata && metadata.streams && metadata.format && metadata.format.duration)) {
-            reject(new Error(`Fail to parse metadata`));
-            return;
-          }
-          const duration = metadata.format.duration;
-          resolve(duration);
-        });
-      });
-      */
     } catch (e) {
       console.log(e);
       throw new HttpException(

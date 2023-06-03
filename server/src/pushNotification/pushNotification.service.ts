@@ -9,6 +9,7 @@ export class PushNotificationService {
 
   async addJob(data: NotificationDTO) {
     try {
+      console.log('running add job');
       const job = await this.pushNotificationQueue.add('pushNotification', data, {
         attempts: 3,
         removeOnComplete: true,

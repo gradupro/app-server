@@ -159,7 +159,7 @@ export class ReportController {
         console.timeEnd('prediction');
       }
       const reportResult = await this.reportService.getOne(report.id, true);
-      console.log('updateReportCategoryResult', reportResult.categories);
+      console.log('updateReportCategoryResult', reportResult);
       if (!reportResult.categories.allIsRegular && reportResult.user.protectors.length > 0) {
         const protectorIds = reportResult.user.protectors.map((p) => `${p.id}`);
         const notificationData: NotificationDTO = {
@@ -167,6 +167,7 @@ export class ReportController {
           reportType: reportResult.categories.mostCategory,
           reporterName: reportResult.user.name,
         };
+        console.log('notificationData', notificationData);
         await this.pushNotificationService.addJob(notificationData);
       }
       return res.status(HttpStatus.CREATED).json({
