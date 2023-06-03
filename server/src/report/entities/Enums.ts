@@ -3,7 +3,7 @@ export enum CategoryEnum {
   robbery = 'robbery',
   theft = 'theft',
   violent = 'violent',
-  emergency = 'emergency',
+  help = 'help',
   regular = 'regular',
 }
 
