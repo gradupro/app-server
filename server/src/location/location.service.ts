@@ -64,9 +64,7 @@ export class LocationService {
       } else {
         routeData = [start_point, [longitude, latitude]];
       }
-      console.log('routeData', routeData);
       const route: string = routeData.map((p) => `${p[0]} ${p[1]}`).join(',');
-      console.log(route);
       await this.locationRepository
         .createQueryBuilder()
         .update()
