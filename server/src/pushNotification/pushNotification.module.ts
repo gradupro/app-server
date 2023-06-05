@@ -7,7 +7,7 @@ import { NaverCloudModule } from '../naver-cloud/naver-cloud.module';
 import { ExpressAdapter } from '@bull-board/express';
 import { createBullBoard } from '@bull-board/api';
 import { Queue } from 'bull';
-import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
+import { BullAdapter } from '@bull-board/api/bullAdapter';
 @Module({
   imports: [
     NaverCloudModule,
@@ -39,7 +39,7 @@ export class PushNotificationModule {
     const serverAdapter = new ExpressAdapter();
     serverAdapter.setBasePath('/api/queues');
     const { addQueue, removeQueue, setQueues, replaceQueues } = createBullBoard({
-      queues: [new BullMQAdapter(this.queue, { allowRetries: true, readOnlyMode: true })],
+      queues: [new BullAdapter(this.queue)],
       serverAdapter,
     });
     consumer.apply(serverAdapter.getRouter()).forRoutes('/queues');
