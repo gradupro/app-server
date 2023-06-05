@@ -37,7 +37,7 @@ export class PushNotificationModule {
 
   configure(consumer: MiddlewareConsumer) {
     const serverAdapter = new ExpressAdapter();
-    serverAdapter.setBasePath('/queues');
+    serverAdapter.setBasePath('/api/queues');
     const { addQueue, removeQueue, setQueues, replaceQueues } = createBullBoard({
       queues: [new BullMQAdapter(this.queue, { allowRetries: true, readOnlyMode: true })],
       serverAdapter,
