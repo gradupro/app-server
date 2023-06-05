@@ -14,7 +14,7 @@ import { instrument } from '@socket.io/admin-ui';
 @WebSocketGateway(3030, {
   transports: ['websocket'],
   cors: {
-    origin: '*',
+    origin: ['https://admin.socket.io'],
     credentials: true,
   },
 })
