@@ -12,8 +12,6 @@ export class PushNotificationService {
       console.log('running add job');
       const job = await this.pushNotificationQueue.add('pushNotification', data, {
         attempts: 3,
-        removeOnComplete: true,
-        removeOnFail: true,
       });
       return job.id;
     } catch (e) {

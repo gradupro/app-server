@@ -26,6 +26,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   afterInit() {
     instrument(this.server, {
+      mode: 'development',
       readonly: true,
       auth: false,
     });
