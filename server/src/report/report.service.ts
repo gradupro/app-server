@@ -526,7 +526,11 @@ export class ReportService {
         allIsRegular,
         countedCategories,
         categoriesRatio,
-        mostCategory: categoriesSorted.at(-1),
+        mostCategory: allIsRegular
+          ? 'regular'
+          : categoriesSorted.at(-1) !== 'regular'
+          ? categoriesSorted.at(-1)
+          : categoriesSorted.at(-2),
       };
     } catch (e) {
       console.log(e);
