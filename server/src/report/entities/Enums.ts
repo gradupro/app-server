@@ -2,7 +2,7 @@ export enum CategoryEnum {
   sexual = 'sexual',
   robbery = 'robbery',
   theft = 'theft',
-  violent = 'violent',
+  violence = 'violence',
   help = 'help',
   regular = 'regular',
 }
