@@ -247,7 +247,7 @@ export class UserService {
 
   async isProtector(wardId: number, checkUserId: number): Promise<any> {
     try {
-      const protectorList = await this.protectorRepository.find({
+      const userProtectorList = await this.protectorRepository.find({
         relations: {
           protector: true,
         },
@@ -268,8 +268,9 @@ export class UserService {
         },
       });
       let isRequestUserProtector: boolean;
-      protectorList.forEach((pl) => {
-        if (pl.protector.id === checkUserId) {
+      console.log(userProtectorList);
+      userProtectorList.forEach((userprotector) => {
+        if (userprotector.protector.id === checkUserId) {
           isRequestUserProtector = true;
         } else {
           isRequestUserProtector = false;
