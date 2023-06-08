@@ -585,7 +585,9 @@ export class ReportService {
         },
       });
       report[`${role}_interruption`] = true;
-      report.end_at = new Date();
+      if (report.protector_interruption && report.reporter_interruption) {
+        report.end_at = new Date();
+      }
       await this.reportRepository.save(report);
       return report;
     } catch (e) {
