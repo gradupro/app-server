@@ -86,5 +86,7 @@ EmerDy는 딥러닝과 음성 처리 기술을 활용하여, 긴급 상황에서
 ![image](https://github.com/gradupro/app-server/assets/19159759/51ca5493-0ffd-4869-8c50-707620e5f517)
 
 ## 프로젝트 결과물
+![그림1](https://github.com/gradupro/app-server/assets/19159759/2a37aad4-1b02-4ac6-8ff6-211c4f5bd966)
+
 
 ## 향후 개선사항
