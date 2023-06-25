@@ -1,4 +1,4 @@
-<img width="499" alt="image" src="https://github.com/gradupro/app-server/assets/19159759/a6a0a018-27a4-444d-9968-f6258a8c82e1"><img width="410" alt="image" src="https://github.com/gradupro/app-server/assets/19159759/e0f83e6e-e86e-42d1-bd70-e1a2ce1101c8"><h1 align="center"> Emerdy Server</h1>
+<h1 align="center"> Emerdy Server</h1>
 
 # 프로젝트 개요
 ## Emerdy
